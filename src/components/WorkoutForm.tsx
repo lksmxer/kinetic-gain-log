@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Exercise, Workout } from '@/models/workout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,18 +11,13 @@ import { downloadWorkout } from '@/utils/fileUtils';
 import { useToast } from '@/components/ui/use-toast';
 
 interface WorkoutFormProps {
+  workout: Workout;
+  onWorkoutChange: (workout: Workout) => void;
   onImport: () => void;
 }
 
-const WorkoutForm: React.FC<WorkoutFormProps> = ({ onImport }) => {
+const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onImport }) => {
   const { toast } = useToast();
-  const [workout, setWorkout] = useState<Workout>({
-    id: uuidv4(),
-    date: new Date().toISOString().split('T')[0],
-    name: 'New Workout',
-    exercises: [],
-    notes: ''
-  });
 
   const addExercise = () => {
     const newExercise: Exercise = {
@@ -33,14 +27,14 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ onImport }) => {
       notes: ''
     };
     
-    setWorkout({
+    onWorkoutChange({
       ...workout,
       exercises: [...workout.exercises, newExercise]
     });
   };
 
   const updateExercise = (updatedExercise: Exercise) => {
-    setWorkout({
+    onWorkoutChange({
       ...workout,
       exercises: workout.exercises.map(exercise => 
         exercise.id === updatedExercise.id ? updatedExercise : exercise
@@ -49,27 +43,25 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ onImport }) => {
   };
 
   const deleteExercise = (exerciseId: string) => {
-    setWorkout({
+    onWorkoutChange({
       ...workout,
       exercises: workout.exercises.filter(exercise => exercise.id !== exerciseId)
     });
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setWorkout({ ...workout, name: e.target.value });
+    onWorkoutChange({ ...workout, name: e.target.value });
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setWorkout({ ...workout, date: e.target.value });
+    onWorkoutChange({ ...workout, date: e.target.value });
   };
 
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setWorkout({ ...workout, notes: e.target.value });
+    onWorkoutChange({ ...workout, notes: e.target.value });
   };
 
   const handleSave = () => {
-    // Here we would typically save to a database
-    // For now, let's just show a success message
     toast({
       title: "Workout saved",
       description: `${workout.name} has been saved.`,

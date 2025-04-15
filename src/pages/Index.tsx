@@ -6,13 +6,20 @@ import Timer from '@/components/Timer';
 import ImportDialog from '@/components/ImportDialog';
 import { Workout } from '@/models/workout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { v4 as uuidv4 } from 'uuid';
 
 const Index = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
+  const [workout, setWorkout] = useState<Workout>({
+    id: uuidv4(),
+    date: new Date().toISOString().split('T')[0],
+    name: 'New Workout',
+    exercises: [],
+    notes: ''
+  });
 
-  const handleImportWorkout = (workout: Workout) => {
-    setCurrentWorkout(workout);
+  const handleImportWorkout = (importedWorkout: Workout) => {
+    setWorkout(importedWorkout);
   };
 
   return (
@@ -24,7 +31,11 @@ const Index = () => {
         </TabsList>
         
         <TabsContent value="workout" className="mt-4">
-          <WorkoutForm onImport={() => setImportDialogOpen(true)} />
+          <WorkoutForm 
+            workout={workout}
+            onWorkoutChange={setWorkout}
+            onImport={() => setImportDialogOpen(true)}
+          />
         </TabsContent>
         
         <TabsContent value="timer" className="mt-4">
