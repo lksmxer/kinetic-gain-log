@@ -1,13 +1,43 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import Layout from '@/components/Layout';
+import WorkoutForm from '@/components/WorkoutForm';
+import Timer from '@/components/Timer';
+import ImportDialog from '@/components/ImportDialog';
+import { Workout } from '@/models/workout';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
+
+  const handleImportWorkout = (workout: Workout) => {
+    setCurrentWorkout(workout);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <Layout>
+      <Tabs defaultValue="workout" className="mb-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="workout">Workout</TabsTrigger>
+          <TabsTrigger value="timer">Timer</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="workout" className="mt-4">
+          <WorkoutForm onImport={() => setImportDialogOpen(true)} />
+        </TabsContent>
+        
+        <TabsContent value="timer" className="mt-4">
+          <Timer />
+        </TabsContent>
+      </Tabs>
+      
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleImportWorkout}
+      />
+    </Layout>
   );
 };
 
