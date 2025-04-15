@@ -1,0 +1,17 @@
+
+{
+  "appId": "app.lovable.kineticlog",
+  "appName": "KineticLog",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": true,
+    "darkTheme": true
+  },
+  "server": {
+    "url": "",
+    "cleartext": true
+  },
+  "cordova": {}
+}
