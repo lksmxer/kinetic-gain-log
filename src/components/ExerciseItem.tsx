@@ -1,13 +1,14 @@
-
 import React, { useState } from 'react';
 import { Exercise, Set } from '@/models/workout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Trash2, Plus, Minus, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, Plus, Minus, ChevronDown, ChevronUp, Thermometer, Calculator } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
 import { cn } from '@/lib/utils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { generateWarmupSets } from "@/utils/workoutCalculations";
 
 interface ExerciseItemProps {
   exercise: Exercise;
@@ -17,6 +18,7 @@ interface ExerciseItemProps {
 
 const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, onUpdate, onDelete }) => {
   const [expanded, setExpanded] = useState(true);
+  const [showWarmupSets, setShowWarmupSets] = useState(false);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onUpdate({ ...exercise, name: e.target.value });
@@ -56,6 +58,16 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, onUpdate, onDelet
     setExpanded(!expanded);
   };
 
+  const getHeaviestWeight = (): number => {
+    if (!exercise.sets || exercise.sets.length === 0) return 0;
+    
+    return exercise.sets.reduce((max, set) => {
+      return (set.weight && set.weight > max) ? set.weight : max;
+    }, 0);
+  };
+
+  const warmupSets = generateWarmupSets(getHeaviestWeight());
+
   return (
     <Card className="bg-secondary/30 backdrop-blur-sm border border-white/5 rounded-xl mb-4">
       <CardHeader className="pb-2">
@@ -93,6 +105,46 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, onUpdate, onDelet
       
       {expanded && (
         <CardContent>
+          {getHeaviestWeight() > 0 && (
+            <Collapsible className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <CollapsibleTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setShowWarmupSets(!showWarmupSets)}
+                    className="bg-secondary/20 border-secondary/30 w-full"
+                  >
+                    <Thermometer className="h-4 w-4 mr-2" />
+                    {showWarmupSets ? "Hide Warm-up Sets" : "Show Warm-up Sets"}
+                  </Button>
+                </CollapsibleTrigger>
+              </div>
+              
+              <CollapsibleContent>
+                <div className="space-y-3 my-3 p-3 bg-secondary/10 rounded-lg">
+                  <div className="grid grid-cols-12 gap-2 text-xs text-muted-foreground px-1">
+                    <div className="col-span-2">Warm-up</div>
+                    <div className="col-span-5">Weight</div>
+                    <div className="col-span-5">Reps</div>
+                  </div>
+                  
+                  {warmupSets.map((set, index) => (
+                    <div key={index} className="grid grid-cols-12 gap-2 items-center text-sm">
+                      <div className="col-span-2">Set {index + 1}</div>
+                      <div className="col-span-5">{set.weight} kg</div>
+                      <div className="col-span-5">{set.reps} reps</div>
+                    </div>
+                  ))}
+                  
+                  <div className="text-xs text-muted-foreground mt-2">
+                    Based on your working weight of {getHeaviestWeight()} kg
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+          
           {exercise.sets.length > 0 ? (
             <div className="space-y-3">
               <div className="grid grid-cols-12 gap-2 text-xs text-muted-foreground px-1">
