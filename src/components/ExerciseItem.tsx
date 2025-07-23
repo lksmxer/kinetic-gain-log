@@ -185,7 +185,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
       )}
     </Card>
   );
-};
+});
 
 interface SetRowProps {
   set: Set;
@@ -283,6 +283,6 @@ const SetRow: React.FC<SetRowProps> = memo(({ set, index, onChange, onDelete }) 
       </div>
     </div>
   );
-};
+});
 
 export default ExerciseItem;
