@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Exercise, Set } from '@/models/workout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ interface ExerciseItemProps {
   onDelete: (id: string) => void;
 }
 
-const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, onUpdate, onDelete }) => {
+const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, onDelete }) => {
   const [expanded, setExpanded] = useState(true);
   const [showWarmupSets, setShowWarmupSets] = useState(false);
 
@@ -194,7 +194,7 @@ interface SetRowProps {
   onDelete: (id: string) => void;
 }
 
-const SetRow: React.FC<SetRowProps> = ({ set, index, onChange, onDelete }) => {
+const SetRow: React.FC<SetRowProps> = memo(({ set, index, onChange, onDelete }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'weight' | 'reps') => {
     const value = parseInt(e.target.value) || 0;
     onChange({ ...set, [field]: value });
