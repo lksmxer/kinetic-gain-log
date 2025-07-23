@@ -29,46 +29,51 @@ const Index = () => {
 
   return (
     <Layout>
-      <div className="flex justify-end mb-4">
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="bg-secondary/20 border-secondary/30"
-        >
-          {theme === 'dark' ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
-        </Button>
-      </div>
-      
-      <Tabs defaultValue="workout" className="mb-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="workout">Workout</TabsTrigger>
-          <TabsTrigger value="timer">Timer</TabsTrigger>
-          <TabsTrigger value="progress">Progress</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="workout" className="mt-4">
-          <WorkoutForm 
-            workout={workout}
-            onWorkoutChange={setWorkout}
-            onImport={() => setImportDialogOpen(true)}
+      {(user) => (
+        <>
+          <div className="flex justify-end mb-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="bg-secondary/20 border-secondary/30"
+            >
+              {theme === 'dark' ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
+            </Button>
+          </div>
+
+          <Tabs defaultValue="workout" className="mb-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="workout">Workout</TabsTrigger>
+              <TabsTrigger value="timer">Timer</TabsTrigger>
+              <TabsTrigger value="progress">Progress</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="workout" className="mt-4">
+              <WorkoutForm
+                workout={workout}
+                onWorkoutChange={setWorkout}
+                onImport={() => setImportDialogOpen(true)}
+                user={user}
+              />
+            </TabsContent>
+
+            <TabsContent value="timer" className="mt-4">
+              <Timer />
+            </TabsContent>
+
+            <TabsContent value="progress" className="mt-4">
+              <ProgressTracker workout={workout} />
+            </TabsContent>
+          </Tabs>
+
+          <ImportDialog
+            open={importDialogOpen}
+            onOpenChange={setImportDialogOpen}
+            onImport={handleImportWorkout}
           />
-        </TabsContent>
-        
-        <TabsContent value="timer" className="mt-4">
-          <Timer />
-        </TabsContent>
-        
-        <TabsContent value="progress" className="mt-4">
-          <ProgressTracker workout={workout} />
-        </TabsContent>
-      </Tabs>
-      
-      <ImportDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-        onImport={handleImportWorkout}
-      />
+        </>
+      )}
     </Layout>
   );
 };

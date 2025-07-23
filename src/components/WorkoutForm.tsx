@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Exercise, Workout } from '@/models/workout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,15 +9,46 @@ import { v4 as uuidv4 } from 'uuid';
 import ExerciseItem from './ExerciseItem';
 import { downloadWorkout } from '@/utils/fileUtils';
 import { useToast } from '@/components/ui/use-toast';
+import { createFile, openFilePicker } from '@/lib/googleDrive';
 
 interface WorkoutFormProps {
   workout: Workout;
   onWorkoutChange: (workout: Workout) => void;
   onImport: () => void;
+  user: any;
 }
 
-const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onImport }) => {
+const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onImport, user }) => {
   const { toast } = useToast();
+
+  const handleSaveToGoogleDrive = () => {
+    const workoutJson = JSON.stringify(workout, null, 2);
+    createFile(workoutJson, `${workout.name}.json`);
+    toast({
+      title: 'Workout saved to Google Drive',
+      description: `${workout.name} has been saved to your Google Drive.`,
+    });
+  };
+
+  const handleLoadFromGoogleDrive = () => {
+    openFilePicker((doc) => {
+      if (doc.action === google.picker.Action.PICKED) {
+        const fileId = doc.docs[0].id;
+        gapi.client.drive.files
+          .get({
+            fileId: fileId,
+            alt: 'media',
+          })
+          .then((res) => {
+            onWorkoutChange(res.result);
+            toast({
+              title: 'Workout loaded from Google Drive',
+              description: `Workout has been loaded from Google Drive.`,
+            });
+          });
+      }
+    });
+  };
 
   const addExercise = () => {
     const newExercise: Exercise = {
@@ -33,21 +64,21 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
     });
   };
 
-  const updateExercise = (updatedExercise: Exercise) => {
+  const updateExercise = useCallback((updatedExercise: Exercise) => {
     onWorkoutChange({
       ...workout,
-      exercises: workout.exercises.map(exercise => 
+      exercises: workout.exercises.map(exercise =>
         exercise.id === updatedExercise.id ? updatedExercise : exercise
       )
     });
-  };
+  }, [workout, onWorkoutChange]);
 
-  const deleteExercise = (exerciseId: string) => {
+  const deleteExercise = useCallback((exerciseId: string) => {
     onWorkoutChange({
       ...workout,
       exercises: workout.exercises.filter(exercise => exercise.id !== exerciseId)
     });
-  };
+  }, [workout, onWorkoutChange]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onWorkoutChange({ ...workout, name: e.target.value });
@@ -106,6 +137,14 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
           <Button onClick={handleSave}>
             <Save className="h-4 w-4 mr-2" />
             Save
+          </Button>
+          <Button onClick={handleSaveToGoogleDrive} disabled={!user}>
+            <Save className="h-4 w-4 mr-2" />
+            Save to Google Drive
+          </Button>
+          <Button onClick={handleLoadFromGoogleDrive} disabled={!user}>
+            <Download className="h-4 w-4 mr-2" />
+            Load from Google Drive
           </Button>
         </div>
       </div>
