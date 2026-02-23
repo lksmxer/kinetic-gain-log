@@ -76,6 +76,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
             value={exercise.name}
             onChange={handleNameChange}
             placeholder="Exercise name"
+            aria-label="Exercise name"
             className="font-medium text-lg bg-background/50 border-none"
           />
           <div className="flex space-x-2">
@@ -84,6 +85,8 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
               size="icon"
               onClick={toggleExpanded}
               className="hover:bg-secondary/50"
+              aria-label={expanded ? "Collapse exercise" : "Expand exercise"}
+              aria-expanded={expanded}
             >
               {expanded ? (
                 <ChevronUp className="h-5 w-5" />
@@ -96,6 +99,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
               size="icon"
               onClick={() => onDelete(exercise.id)}
               className="text-destructive hover:bg-destructive/20"
+              aria-label="Delete exercise"
             >
               <Trash2 className="h-5 w-5" />
             </Button>
@@ -185,7 +189,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
       )}
     </Card>
   );
-};
+});
 
 interface SetRowProps {
   set: Set;
@@ -232,6 +236,7 @@ const SetRow: React.FC<SetRowProps> = memo(({ set, index, onChange, onDelete }) 
           onChange={(e) => handleInputChange(e, 'weight')}
           className="h-8 text-center bg-background/50 border-none"
           placeholder="kg"
+          aria-label={`Weight for set ${index + 1}`}
         />
       </div>
       
@@ -242,6 +247,7 @@ const SetRow: React.FC<SetRowProps> = memo(({ set, index, onChange, onDelete }) 
           onChange={(e) => handleInputChange(e, 'reps')}
           className="h-8 text-center bg-background/50 border-none"
           placeholder="#"
+          aria-label={`Reps for set ${index + 1}`}
         />
       </div>
       
@@ -253,6 +259,7 @@ const SetRow: React.FC<SetRowProps> = memo(({ set, index, onChange, onDelete }) 
             max={5}
             step={0.5}
             onValueChange={handleRirChange}
+            aria-label={`RIR for set ${index + 1}`}
           />
           <span className="text-xs mt-1">{set.rir}</span>
         </div>
@@ -266,6 +273,7 @@ const SetRow: React.FC<SetRowProps> = memo(({ set, index, onChange, onDelete }) 
             max={10}
             step={0.5}
             onValueChange={handleRpeChange}
+            aria-label={`RPE for set ${index + 1}`}
           />
           <span className="text-xs mt-1">{set.rpe}</span>
         </div>
@@ -277,12 +285,13 @@ const SetRow: React.FC<SetRowProps> = memo(({ set, index, onChange, onDelete }) 
           size="icon"
           onClick={() => onDelete(set.id)}
           className="h-6 w-6 hover:bg-destructive/20 hover:text-destructive"
+          aria-label={`Delete set ${index + 1}`}
         >
           <Minus className="h-3 w-3" />
         </Button>
       </div>
     </div>
   );
-};
+});
 
 export default ExerciseItem;
