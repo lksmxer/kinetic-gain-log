@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { generateWarmupSets } from "@/utils/workoutCalculations";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ExerciseItemProps {
   exercise: Exercise;
@@ -152,10 +153,11 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
           {exercise.sets.length > 0 ? (
             <div className="space-y-3">
               <div className="grid grid-cols-12 gap-2 text-xs text-muted-foreground px-1">
+                <div className="col-span-1 text-center font-medium">Done</div>
                 <div className="col-span-1">#</div>
                 <div className="col-span-2">Weight</div>
                 <div className="col-span-2">Reps</div>
-                <div className="col-span-3">RIR</div>
+                <div className="col-span-2">RIR</div>
                 <div className="col-span-3">RPE</div>
                 <div className="col-span-1"></div>
               </div>
@@ -227,6 +229,12 @@ const SetRow: React.FC<SetRowProps> = memo(({ set, index, onChange, onDelete }) 
       "grid grid-cols-12 gap-2 items-center py-2 px-1 rounded-lg",
       set.completed ? "bg-primary/10" : "bg-secondary/20"
     )}>
+      <div className="col-span-1 flex justify-center">
+        <Checkbox
+          checked={set.completed}
+          onCheckedChange={handleComplete}
+        />
+      </div>
       <div className="col-span-1 text-sm font-medium">{index + 1}</div>
       
       <div className="col-span-2">
@@ -251,7 +259,7 @@ const SetRow: React.FC<SetRowProps> = memo(({ set, index, onChange, onDelete }) 
         />
       </div>
       
-      <div className="col-span-3">
+      <div className="col-span-2">
         <div className="flex flex-col items-center">
           <Slider
             value={[set.rir || 2]}
