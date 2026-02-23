@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Layout from '@/components/Layout';
 import WorkoutForm from '@/components/WorkoutForm';
 import Timer from '@/components/Timer';
@@ -23,9 +23,17 @@ const Index = () => {
   });
   const { theme, setTheme } = useTheme();
 
-  const handleImportWorkout = (importedWorkout: Workout) => {
+  const handleImportWorkout = useCallback((importedWorkout: Workout) => {
     setWorkout(importedWorkout);
-  };
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  }, [theme, setTheme]);
+
+  const handleOpenImportDialog = useCallback(() => {
+    setImportDialogOpen(true);
+  }, []);
 
   return (
     <Layout>
@@ -35,7 +43,7 @@ const Index = () => {
             <Button
               variant="outline"
               size="icon"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              onClick={toggleTheme}
               className="bg-secondary/20 border-secondary/30"
             >
               {theme === 'dark' ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
@@ -53,7 +61,7 @@ const Index = () => {
               <WorkoutForm
                 workout={workout}
                 onWorkoutChange={setWorkout}
-                onImport={() => setImportDialogOpen(true)}
+                onImport={handleOpenImportDialog}
                 user={user}
               />
             </TabsContent>
