@@ -1,5 +1,5 @@
 
-import { Workout } from "@/models/workout";
+import { Workout, workoutSchema } from "@/models/workout";
 
 // Format for export: JSON with custom formatting
 export const exportWorkoutToText = (workout: Workout): string => {
@@ -22,7 +22,15 @@ export const downloadWorkout = (workout: Workout) => {
 
 export const importWorkoutFromText = (text: string): Workout | null => {
   try {
-    return JSON.parse(text) as Workout;
+    const parsed = JSON.parse(text);
+    const result = workoutSchema.safeParse(parsed);
+
+    if (result.success) {
+      return result.data;
+    } else {
+      console.error("Failed to validate workout data:", result.error);
+      return null;
+    }
   } catch (error) {
     console.error("Failed to parse workout file:", error);
     return null;

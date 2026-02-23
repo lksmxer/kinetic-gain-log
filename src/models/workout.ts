@@ -1,24 +1,31 @@
+import { z } from "zod";
 
-export interface Exercise {
-  id: string;
-  name: string;
-  sets: Set[];
-  notes?: string;
-}
+export const setSchema = z.object({
+  id: z.string(),
+  reps: z.number(),
+  weight: z.number().optional(),
+  rir: z.number().optional(),
+  rpe: z.number().optional(),
+  completed: z.boolean(),
+});
 
-export interface Set {
-  id: string;
-  reps: number;
-  weight?: number;
-  rir?: number; // Reps In Reserve
-  rpe?: number; // Rate of Perceived Exertion
-  completed: boolean;
-}
+export type Set = z.infer<typeof setSchema>;
 
-export interface Workout {
-  id: string;
-  date: string;
-  name: string;
-  exercises: Exercise[];
-  notes?: string;
-}
+export const exerciseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  sets: z.array(setSchema),
+  notes: z.string().optional(),
+});
+
+export type Exercise = z.infer<typeof exerciseSchema>;
+
+export const workoutSchema = z.object({
+  id: z.string(),
+  date: z.string(),
+  name: z.string(),
+  exercises: z.array(exerciseSchema),
+  notes: z.string().optional(),
+});
+
+export type Workout = z.infer<typeof workoutSchema>;
