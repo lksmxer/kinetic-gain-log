@@ -6,25 +6,50 @@ import { Button } from '@/components/ui/button';
 import { initClient, initGis, handleAuthClick, handleSignoutClick } from '@/lib/googleDrive';
 
 interface LayoutProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: (user: any) => React.ReactNode;
   className?: string;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, className }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
+  const [scriptsLoaded, setScriptsLoaded] = useState(false);
 
   useEffect(() => {
-    initClient(() => {
-      // After gapi is initialized, check if the user is already signed in.
-      const token = gapi.client.getToken();
-      if (token) {
-        setUser(token);
+    // We need to wait for gapi and google to load
+    const checkScripts = setInterval(() => {
+      if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
+        clearInterval(checkScripts);
+        setScriptsLoaded(true);
       }
-    });
-    initGis((token) => {
-      setUser(token);
-    });
+    }, 100);
+    return () => clearInterval(checkScripts);
   }, []);
+
+  useEffect(() => {
+    if (!scriptsLoaded) return;
+
+    try {
+      initClient(() => {
+        // After gapi is initialized, check if the user is already signed in.
+        const token = gapi.client.getToken();
+        if (token) {
+          setUser(token);
+        }
+      });
+    } catch (e) {
+      console.error("gapi init error", e);
+    }
+
+    try {
+      initGis((token) => {
+        setUser(token);
+      });
+    } catch (e) {
+      console.error("gis init error", e);
+    }
+  }, [scriptsLoaded]);
 
   const handleSignIn = () => {
     handleAuthClick();
@@ -50,7 +75,7 @@ const Layout: React.FC<LayoutProps> = ({ children, className }) => {
             {user ? (
               <Button onClick={handleSignOut}>Sign Out</Button>
             ) : (
-              <Button onClick={handleSignIn}>Sign in with Google</Button>
+              <Button onClick={handleSignIn} disabled={!scriptsLoaded}>Sign in with Google</Button>
             )}
           </div>
         </div>
