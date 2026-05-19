@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useMemo, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Workout } from '@/models/workout';
+import { Workout, Exercise } from '@/models/workout';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { calculateOneRepMax, calculateVolumeByExercise } from '@/utils/workoutCalculations';
@@ -10,16 +10,36 @@ interface ProgressTrackerProps {
   workout: Workout;
 }
 
-const ProgressTracker: React.FC<ProgressTrackerProps> = ({ workout }) => {
-  // Mock data for demonstration
-  const progressData = [
-    { date: '2025-04-10', squat: 225, bench: 185, deadlift: 315 },
-    { date: '2025-04-12', squat: 230, bench: 190, deadlift: 325 },
-    { date: '2025-04-14', squat: 235, bench: 190, deadlift: 335 },
-    { date: '2025-04-15', squat: 240, bench: 195, deadlift: 345 },
-  ];
+// Mock data for demonstration - moved outside to avoid re-allocation
+const progressData = [
+  { date: '2025-04-10', squat: 225, bench: 185, deadlift: 315 },
+  { date: '2025-04-12', squat: 230, bench: 190, deadlift: 325 },
+  { date: '2025-04-14', squat: 235, bench: 190, deadlift: 335 },
+  { date: '2025-04-15', squat: 240, bench: 195, deadlift: 345 },
+];
 
-  const volumeData = calculateVolumeByExercise(workout);
+const OneRMItem = memo(({ exercise }: { exercise: Exercise }) => {
+  const oneRM = useMemo(() => calculateOneRepMax(exercise), [exercise]);
+
+  if (!oneRM) return null;
+
+  return (
+    <div className="flex justify-between items-center">
+      <span className="font-medium">{exercise.name}</span>
+      <div className="space-y-1">
+        <div className="text-lg font-bold">{oneRM.toFixed(1)} kg</div>
+        <div className="text-xs text-muted-foreground">
+          Based on your heaviest set
+        </div>
+      </div>
+    </div>
+  );
+});
+
+OneRMItem.displayName = 'OneRMItem';
+
+const ProgressTracker: React.FC<ProgressTrackerProps> = ({ workout }) => {
+  const volumeData = useMemo(() => calculateVolumeByExercise(workout), [workout]);
 
   return (
     <div className="space-y-6">
@@ -94,20 +114,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ workout }) => {
             <CardContent>
               <div className="space-y-4">
                 {workout.exercises.length > 0 ? (
-                  workout.exercises.map((exercise) => {
-                    const oneRM = calculateOneRepMax(exercise);
-                    return oneRM ? (
-                      <div key={exercise.id} className="flex justify-between items-center">
-                        <span className="font-medium">{exercise.name}</span>
-                        <div className="space-y-1">
-                          <div className="text-lg font-bold">{oneRM.toFixed(1)} kg</div>
-                          <div className="text-xs text-muted-foreground">
-                            Based on your heaviest set
-                          </div>
-                        </div>
-                      </div>
-                    ) : null;
-                  })
+                  workout.exercises.map((exercise) => (
+                    <OneRMItem key={exercise.id} exercise={exercise} />
+                  ))
                 ) : (
                   <p className="text-muted-foreground">
                     Add exercises with weight and reps to calculate your estimated 1RM.
