@@ -15,6 +15,10 @@ let gisInited = false;
  * @param callback A function to call after the client is initialized.
  */
 export const initClient = (callback: () => void) => {
+  if (!API_KEY) {
+    console.warn("VITE_GOOGLE_API_KEY is not defined");
+    return;
+  }
   gapi.load('client', () => {
     gapi.client
       .init({
@@ -24,7 +28,7 @@ export const initClient = (callback: () => void) => {
       .then(() => {
         gapiInited = true;
         callback();
-      });
+      }).catch(err => console.error("GAPI ERROR", err));
   });
 };
 
@@ -33,6 +37,10 @@ export const initClient = (callback: () => void) => {
  * @param callback A function to call after the client is initialized.
  */
 export const initGis = (callback: (token: google.accounts.oauth2.TokenResponse) => void) => {
+  if (!CLIENT_ID) {
+    console.warn("VITE_GOOGLE_CLIENT_ID is not defined");
+    return;
+  }
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
@@ -92,6 +100,7 @@ export const createFile = (content: string, fileName: string) => {
     });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const openFilePicker = (callback: (doc: any) => void) => {
   const view = new google.picker.View(google.picker.ViewId.DOCS);
   view.setMimeTypes('application/json');
