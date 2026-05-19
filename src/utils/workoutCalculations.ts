@@ -29,26 +29,41 @@ export interface VolumeData {
 }
 
 export const calculateVolumeByExercise = (workout: Workout): VolumeData[] => {
-  return workout.exercises.map(exercise => {
+  const exercises = workout.exercises;
+  const numExercises = exercises.length;
+  const result = new Array(numExercises);
+
+  for (let i = 0; i < numExercises; i++) {
+    const exercise = exercises[i];
     let totalVolume = 0;
     let totalReps = 0;
     let setCount = 0;
     
-    exercise.sets.forEach(set => {
-      if (set.weight && set.reps) {
-        totalVolume += set.weight * set.reps;
-        totalReps += set.reps;
-        setCount++;
+    const sets = exercise.sets;
+    if (sets) {
+      const numSets = sets.length;
+      for (let j = 0; j < numSets; j++) {
+        const set = sets[j];
+        const weight = set.weight;
+        const reps = set.reps;
+
+        if (weight && reps) {
+          totalVolume += weight * reps;
+          totalReps += reps;
+          setCount++;
+        }
       }
-    });
+    }
     
-    return {
+    result[i] = {
       exerciseName: exercise.name || 'Unnamed Exercise',
       totalVolume,
       setCount,
       totalReps
     };
-  });
+  }
+
+  return result;
 };
 
 export const generateWarmupSets = (workingWeight: number): { weight: number, reps: number }[] => {
