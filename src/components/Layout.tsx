@@ -6,34 +6,54 @@ import { Button } from '@/components/ui/button';
 import { initClient, initGis, handleAuthClick, handleSignoutClick } from '@/lib/googleDrive';
 
 interface LayoutProps {
-  children: (user: any) => React.ReactNode;
+  children: (user: google.accounts.oauth2.TokenResponse | null) => React.ReactNode;
   className?: string;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, className }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<google.accounts.oauth2.TokenResponse | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     initClient(() => {
       // After gapi is initialized, check if the user is already signed in.
       const token = gapi.client.getToken();
-      if (token) {
+      if (token && token.access_token) {
         setUser(token);
       }
     });
     initGis((token) => {
-      setUser(token);
+      if (token.error) {
+        console.error('GIS Error:', token.error);
+        toast({
+          variant: "destructive",
+          title: "Authentication failed",
+          description: `Error: ${token.error_description || token.error}`,
+        });
+        return;
+      }
+
+      if (token.access_token) {
+        setUser(token);
+        toast({
+          title: "Signed in successfully",
+          description: "You are now connected to Google Drive.",
+        });
+      }
     });
-  }, []);
+  }, [toast]);
 
   const handleSignIn = () => {
     handleAuthClick();
-    // TODO: Listen for token changes and update the user state.
   };
 
   const handleSignOut = () => {
     handleSignoutClick();
     setUser(null);
+    toast({
+      title: "Signed out",
+      description: "You have been signed out from Google Drive.",
+    });
   };
 
   return (
