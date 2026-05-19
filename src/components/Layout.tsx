@@ -6,12 +6,12 @@ import { Button } from '@/components/ui/button';
 import { initClient, initGis, handleAuthClick, handleSignoutClick } from '@/lib/googleDrive';
 
 interface LayoutProps {
-  children: (user: any) => React.ReactNode;
+  children: (user: google.accounts.oauth2.TokenResponse | null) => React.ReactNode;
   className?: string;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, className }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<google.accounts.oauth2.TokenResponse | null>(null);
 
   useEffect(() => {
     initClient(() => {

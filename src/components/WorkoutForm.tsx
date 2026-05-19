@@ -15,7 +15,7 @@ interface WorkoutFormProps {
   workout: Workout;
   onWorkoutChange: (workout: Workout) => void;
   onImport: () => void;
-  user: any;
+  user: google.accounts.oauth2.TokenResponse | null;
 }
 
 const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onImport, user }) => {
