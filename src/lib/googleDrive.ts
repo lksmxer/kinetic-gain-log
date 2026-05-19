@@ -1,8 +1,8 @@
 // This file will contain the logic for interacting with the Google Drive API.
 // It will handle authentication, file creation, and file reading.
 
-const CLIENT_ID = 'YOUR_CLIENT_ID'; // TODO: Replace with your client ID
-const API_KEY = 'YOUR_API_KEY'; // TODO: Replace with your API key
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
