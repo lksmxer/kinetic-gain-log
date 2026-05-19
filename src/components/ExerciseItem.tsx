@@ -1,10 +1,10 @@
 import React, { useState, memo } from 'react';
 import { Exercise, Set } from '@/models/workout';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Trash2, Plus, Minus, ChevronDown, ChevronUp, Thermometer, Calculator } from "lucide-react";
+import { Trash2, Plus, Minus, ChevronDown, ChevronUp, Thermometer } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
