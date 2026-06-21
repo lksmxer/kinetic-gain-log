@@ -95,9 +95,7 @@ export const createFile = (content: string, fileName: string) => {
       media: media,
       fields: 'id',
     })
-    .then((response) => {
-      console.log('File ID:', response.result.id);
-    });
+    .then();
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
