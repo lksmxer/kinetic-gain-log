@@ -15,7 +15,7 @@ interface WorkoutFormProps {
   workout: Workout;
   onWorkoutChange: (workout: Workout) => void;
   onImport: () => void;
-  user: any;
+  user: unknown;
 }
 
 const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onImport, user }) => {

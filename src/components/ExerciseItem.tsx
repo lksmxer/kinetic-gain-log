@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useMemo } from 'react';
 import { Exercise, Set } from '@/models/workout';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,15 +59,15 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
     setExpanded(!expanded);
   };
 
-  const getHeaviestWeight = (): number => {
+  const heaviestWeight = useMemo(() => {
     if (!exercise.sets || exercise.sets.length === 0) return 0;
     
     return exercise.sets.reduce((max, set) => {
       return (set.weight && set.weight > max) ? set.weight : max;
     }, 0);
-  };
+  }, [exercise.sets]);
 
-  const warmupSets = generateWarmupSets(getHeaviestWeight());
+  const warmupSets = useMemo(() => generateWarmupSets(heaviestWeight), [heaviestWeight]);
 
   return (
     <Card className="bg-secondary/30 backdrop-blur-sm border border-white/5 rounded-xl mb-4">
@@ -110,7 +110,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
       
       {expanded && (
         <CardContent>
-          {getHeaviestWeight() > 0 && (
+          {heaviestWeight > 0 && (
             <Collapsible className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <CollapsibleTrigger asChild>
@@ -143,7 +143,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
                   ))}
                   
                   <div className="text-xs text-muted-foreground mt-2">
-                    Based on your working weight of {getHeaviestWeight()} kg
+                    Based on your working weight of {heaviestWeight} kg
                   </div>
                 </div>
               </CollapsibleContent>

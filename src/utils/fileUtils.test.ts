@@ -24,9 +24,9 @@ const mockWorkout: Workout = {
 describe("fileUtils", () => {
   afterEach(() => {
     // Restore console.error if it was mocked/spied
-    // @ts-ignore
+    // @ts-expect-error mock
     if (console.error.mockRestore) {
-      // @ts-ignore
+      // @ts-expect-error mock
       console.error.mockRestore();
     }
   });
