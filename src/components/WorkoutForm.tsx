@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Exercise, Workout } from '@/models/workout';
+import { Exercise, Workout, workoutSchema } from '@/models/workout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,13 +21,22 @@ interface WorkoutFormProps {
 const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onImport, user }) => {
   const { toast } = useToast();
 
-  const handleSaveToGoogleDrive = () => {
+  const handleSaveToGoogleDrive = async () => {
     const workoutJson = JSON.stringify(workout, null, 2);
-    createFile(workoutJson, `${workout.name}.json`);
-    toast({
-      title: 'Workout saved to Google Drive',
-      description: `${workout.name} has been saved to your Google Drive.`,
-    });
+    try {
+      await createFile(workoutJson, `${workout.name}.json`);
+      toast({
+        title: 'Workout saved to Google Drive',
+        description: `${workout.name} has been saved to your Google Drive.`,
+      });
+    } catch (error) {
+      console.error('Failed to save to Google Drive', error);
+      toast({
+        title: 'Error saving to Google Drive',
+        description: 'An error occurred while saving the workout.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleLoadFromGoogleDrive = () => {
@@ -40,10 +49,40 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
             alt: 'media',
           })
           .then((res) => {
-            onWorkoutChange(res.result);
+            let dataToParse;
+            if (typeof res.body === 'string') {
+              try {
+                dataToParse = JSON.parse(res.body);
+              } catch (e) {
+                console.error('Error parsing JSON from body', e);
+                dataToParse = null;
+              }
+            } else {
+              dataToParse = res.result;
+            }
+
+            const parsed = workoutSchema.safeParse(dataToParse);
+            if (parsed.success) {
+              onWorkoutChange(parsed.data);
+              toast({
+                title: 'Workout loaded from Google Drive',
+                description: `Workout has been loaded from Google Drive.`,
+              });
+            } else {
+              console.error('Validation error', parsed.error);
+              toast({
+                title: 'Error loading from Google Drive',
+                description: 'The workout data is invalid or corrupted.',
+                variant: 'destructive',
+              });
+            }
+          })
+          .catch((error) => {
+            console.error('Failed to load from Google Drive', error);
             toast({
-              title: 'Workout loaded from Google Drive',
-              description: `Workout has been loaded from Google Drive.`,
+              title: 'Error loading from Google Drive',
+              description: 'An error occurred while loading the workout.',
+              variant: 'destructive',
             });
           });
       }
