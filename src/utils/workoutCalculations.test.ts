@@ -5,7 +5,7 @@ import { Exercise } from "@/models/workout";
 
 describe("calculateOneRepMax", () => {
   test("should return null for exercise with no sets", () => {
-    const exercise: any = { id: "1", name: "Bench Press", sets: undefined };
+    const exercise = { id: "1", name: "Bench Press", sets: undefined } as unknown as Exercise;
     expect(calculateOneRepMax(exercise)).toBeNull();
   });
 
@@ -102,7 +102,7 @@ describe("calculateVolumeByExercise", () => {
           ]
         }
       ]
-    } as any;
+    } as unknown as Workout;
 
     const volumeData = calculateVolumeByExercise(workout);
 
@@ -125,9 +125,57 @@ describe("calculateVolumeByExercise", () => {
     const workout = {
       id: "w1",
       exercises: [{ id: "e1", sets: [] }]
-    } as any;
+    } as unknown as Workout;
     const volumeData = calculateVolumeByExercise(workout);
     expect(volumeData[0].exerciseName).toBe("Unnamed Exercise");
+  });
+
+  test("should return empty array for workout with no exercises", () => {
+    const workout = { id: "w1", exercises: [] } as unknown as Workout;
+    const volumeData = calculateVolumeByExercise(workout);
+    expect(volumeData).toHaveLength(0);
+  });
+
+  test("should ignore sets with missing weight or reps", () => {
+    const workout = {
+      id: "w1",
+      exercises: [
+        {
+          id: "e1",
+          name: "Squat",
+          sets: [
+            { id: "s1", weight: 100, reps: 5, completed: true },
+            { id: "s2", reps: 5, completed: true }, // missing weight
+            { id: "s3", weight: 100, completed: true }, // missing reps
+            { id: "s4", weight: 0, reps: 5, completed: true }, // zero weight
+            { id: "s5", weight: 100, reps: 0, completed: true }, // zero reps
+          ]
+        }
+      ]
+    } as unknown as Workout;
+    const volumeData = calculateVolumeByExercise(workout);
+    expect(volumeData).toHaveLength(1);
+    expect(volumeData[0]).toEqual({
+      exerciseName: "Squat",
+      totalVolume: 500, // Only the first set is counted (100 * 5)
+      setCount: 1,
+      totalReps: 5
+    });
+  });
+
+  test("should handle missing sets array on an exercise", () => {
+    const workout = {
+      id: "w1",
+      exercises: [{ id: "e1", name: "Deadlift" }]
+    } as unknown as Workout;
+    const volumeData = calculateVolumeByExercise(workout);
+    expect(volumeData).toHaveLength(1);
+    expect(volumeData[0]).toEqual({
+      exerciseName: "Deadlift",
+      totalVolume: 0,
+      setCount: 0,
+      totalReps: 0
+    });
   });
 });
 

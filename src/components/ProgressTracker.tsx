@@ -10,14 +10,6 @@ interface ProgressTrackerProps {
   workout: Workout;
 }
 
-// Mock data for demonstration - moved outside to avoid re-allocation
-const progressData = [
-  { date: '2025-04-10', squat: 225, bench: 185, deadlift: 315 },
-  { date: '2025-04-12', squat: 230, bench: 190, deadlift: 325 },
-  { date: '2025-04-14', squat: 235, bench: 190, deadlift: 335 },
-  { date: '2025-04-15', squat: 240, bench: 195, deadlift: 345 },
-];
-
 const OneRMItem = memo(({ exercise }: { exercise: Exercise }) => {
   const oneRM = useMemo(() => calculateOneRepMax(exercise), [exercise]);
 
@@ -56,23 +48,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ workout }) => {
               <CardTitle className="text-base">Strength Progress Over Time</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-80 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={progressData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="squat" stroke="#8884d8" name="Squat" />
-                    <Line type="monotone" dataKey="bench" stroke="#82ca9d" name="Bench Press" />
-                    <Line type="monotone" dataKey="deadlift" stroke="#ffc658" name="Deadlift" />
-                  </LineChart>
-                </ResponsiveContainer>
+              <div className="h-80 w-full flex items-center justify-center text-muted-foreground">
+                <p>Not enough data to display progress chart.</p>
               </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                Track your strength progress across key lifts over time.
-              </p>
             </CardContent>
           </Card>
         </TabsContent>

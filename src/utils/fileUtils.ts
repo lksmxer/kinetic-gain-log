@@ -1,5 +1,6 @@
 
 import { Workout, workoutSchema } from "@/models/workout";
+import sjson from 'secure-json-parse';
 
 // Format for export: JSON with custom formatting
 export const exportWorkoutToText = (workout: Workout): string => {
@@ -22,7 +23,7 @@ export const downloadWorkout = (workout: Workout) => {
 
 export const importWorkoutFromText = (text: string): Workout | null => {
   try {
-    const parsed = JSON.parse(text);
+    const parsed = sjson.parse(text, { protoAction: 'remove', constructorAction: 'remove' });
     const result = workoutSchema.safeParse(parsed);
 
     if (result.success) {

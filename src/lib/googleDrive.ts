@@ -7,8 +7,6 @@ const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/res
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
 let tokenClient: google.accounts.oauth2.TokenClient;
-let gapiInited = false;
-let gisInited = false;
 
 /**
  * Initializes the Google API client.
@@ -26,7 +24,6 @@ export const initClient = (callback: () => void) => {
         discoveryDocs: [DISCOVERY_DOC],
       })
       .then(() => {
-        gapiInited = true;
         callback();
       }).catch(err => console.error("GAPI ERROR", err));
   });
@@ -46,7 +43,6 @@ export const initGis = (callback: (token: google.accounts.oauth2.TokenResponse) 
     scope: SCOPES,
     callback: callback,
   });
-  gisInited = true;
 };
 
 /**

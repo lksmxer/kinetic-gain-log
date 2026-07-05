@@ -44,6 +44,7 @@ const Layout: React.FC<LayoutProps> = ({ children, className }) => {
 
     try {
       initGis((token) => {
+        gapi.client.setToken(token);
         setUser(token);
       });
     } catch (e) {
@@ -53,7 +54,6 @@ const Layout: React.FC<LayoutProps> = ({ children, className }) => {
 
   const handleSignIn = () => {
     handleAuthClick();
-    // TODO: Listen for token changes and update the user state.
   };
 
   const handleSignOut = () => {
