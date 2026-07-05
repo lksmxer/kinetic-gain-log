@@ -72,28 +72,77 @@ export const handleSignoutClick = () => {
 };
 
 /**
- * Creates a file in Google Drive.
+ * Creates a file in Google Drive, updating it if a file with the same name already exists.
  * @param content The content of the file.
  * @param fileName The name of the file.
  */
-export const createFile = (content: string, fileName: string) => {
-  const fileMetadata = {
-    name: fileName,
-    mimeType: 'application/json',
-  };
-  const media = {
-    mimeType: 'application/json',
-    body: content,
-  };
-  gapi.client.drive.files
-    .create({
-      resource: fileMetadata,
-      media: media,
-      fields: 'id',
-    })
-    .then((response) => {
-      console.log('File ID:', response.result.id);
-    });
+export const createFile = async (content: string, fileName: string): Promise<void> => {
+  const token = gapi.client.getToken();
+  if (!token) {
+    throw new Error('Not authenticated');
+  }
+
+  // 1. Check if file exists
+  const listResponse = await gapi.client.drive.files.list({
+    q: `name='${fileName}' and trashed=false`,
+    spaces: 'drive',
+    fields: 'files(id, name)',
+  });
+
+  const files = listResponse.result.files;
+  const fileId = files && files.length > 0 ? files[0].id : null;
+
+  if (fileId) {
+    // 2a. Update existing file
+    const response = await fetch(
+      `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,
+      {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: content,
+      }
+    );
+    if (!response.ok) {
+      throw new Error('Failed to update file');
+    }
+  } else {
+    // 2b. Create new file
+    const boundary = '-------314159265358979323846';
+    const delimiter = "\r\n--" + boundary + "\r\n";
+    const close_delim = "\r\n--" + boundary + "--";
+
+    const metadata = {
+      name: fileName,
+      mimeType: 'application/json',
+    };
+
+    const multipartRequestBody =
+      delimiter +
+      'Content-Type: application/json\r\n\r\n' +
+      JSON.stringify(metadata) +
+      delimiter +
+      'Content-Type: application/json\r\n\r\n' +
+      content +
+      close_delim;
+
+    const response = await fetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token.access_token}`,
+          'Content-Type': `multipart/related; boundary=${boundary}`,
+        },
+        body: multipartRequestBody,
+      }
+    );
+    if (!response.ok) {
+      throw new Error('Failed to create file');
+    }
+  }
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
