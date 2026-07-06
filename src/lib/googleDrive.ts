@@ -145,8 +145,7 @@ export const createFile = async (content: string, fileName: string): Promise<voi
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const openFilePicker = (callback: (doc: any) => void) => {
+export const openFilePicker = (callback: (doc: google.picker.ResponseObject) => void) => {
   const view = new google.picker.View(google.picker.ViewId.DOCS);
   view.setMimeTypes('application/json');
   const picker = new google.picker.PickerBuilder()

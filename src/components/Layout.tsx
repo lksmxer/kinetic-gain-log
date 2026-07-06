@@ -6,14 +6,12 @@ import { Button } from '@/components/ui/button';
 import { initClient, initGis, handleAuthClick, handleSignoutClick } from '@/lib/googleDrive';
 
 interface LayoutProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  children: (user: any) => React.ReactNode;
+  children: (user: google.accounts.oauth2.TokenResponse | null) => React.ReactNode;
   className?: string;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, className }) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<google.accounts.oauth2.TokenResponse | null>(null);
   const [scriptsLoaded, setScriptsLoaded] = useState(false);
 
   useEffect(() => {
@@ -50,6 +48,19 @@ const Layout: React.FC<LayoutProps> = ({ children, className }) => {
     } catch (e) {
       console.error("gis init error", e);
     }
+
+    // Listen for token changes periodically since Google APIs don't provide a direct event
+    const tokenCheckInterval = setInterval(() => {
+      if (typeof gapi !== 'undefined' && gapi.client) {
+        const currentToken = gapi.client.getToken();
+        setUser((prev) => {
+          if (prev?.access_token === currentToken?.access_token) return prev;
+          return currentToken;
+        });
+      }
+    }, 5000);
+
+    return () => clearInterval(tokenCheckInterval);
   }, [scriptsLoaded]);
 
   const handleSignIn = () => {

@@ -5,15 +5,18 @@ export const calculateOneRepMax = (exercise: Exercise): number | null => {
   if (!exercise.sets || exercise.sets.length === 0) return null;
   
   // Find the set with the highest weight × reps value
-  const bestSet = exercise.sets.reduce((best, current) => {
-    // Skip sets with no weight or reps data
-    if (!current.weight || !current.reps) return best;
+  let bestSet: Set | null = null;
+  let bestValue = 0;
+
+  for (const current of exercise.sets) {
+    if (!current.weight || !current.reps) continue;
     
     const currentValue = current.weight * current.reps;
-    const bestValue = best ? (best.weight || 0) * (best.reps || 0) : 0;
-    
-    return currentValue > bestValue ? current : best;
-  }, null as Set | null);
+    if (currentValue > bestValue) {
+      bestValue = currentValue;
+      bestSet = current;
+    }
+  }
   
   if (!bestSet || !bestSet.weight || !bestSet.reps) return null;
   
@@ -66,6 +69,13 @@ export const calculateVolumeByExercise = (workout: Workout): VolumeData[] => {
   return result;
 };
 
+const WARMUP_PROTOCOL = [
+  { percentage: 0.4, reps: 10 },
+  { percentage: 0.6, reps: 8 },
+  { percentage: 0.8, reps: 5 },
+  { percentage: 0.9, reps: 3 },
+];
+
 export const generateWarmupSets = (workingWeight: number): { weight: number, reps: number }[] => {
   // Common warm-up protocol: 
   // - 40% × 10 reps
@@ -74,14 +84,7 @@ export const generateWarmupSets = (workingWeight: number): { weight: number, rep
   // - 90% × 3 reps
   // - 100% × working reps
   
-  const warmupSets = [
-    { percentage: 0.4, reps: 10 },
-    { percentage: 0.6, reps: 8 },
-    { percentage: 0.8, reps: 5 },
-    { percentage: 0.9, reps: 3 },
-  ];
-  
-  return warmupSets.map(set => ({
+  return WARMUP_PROTOCOL.map(set => ({
     weight: Math.round(workingWeight * set.percentage / 5) * 5, // Round to nearest 5
     reps: set.reps
   }));

@@ -8,7 +8,9 @@ export const exportWorkoutToText = (workout: Workout): string => {
 };
 
 export const downloadWorkout = (workout: Workout) => {
-  const filename = `workout_${workout.name.replace(/\s+/g, '_')}_${workout.date}.txt`;
+  const sanitizedName = workout.name.replace(/[^a-zA-Z0-9_\- ]/g, '').replace(/\s+/g, '_');
+  const sanitizedDate = workout.date.replace(/[^a-zA-Z0-9_\-]/g, '');
+  const filename = `workout_${sanitizedName}_${sanitizedDate}.txt`;
   const text = exportWorkoutToText(workout);
   
   const element = document.createElement('a');
