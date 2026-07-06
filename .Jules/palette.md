@@ -1,5 +1,1 @@
-# Palette's Journal
-
-## 2024-05-22 - Accessibility in Exercise Lists
-**Learning:** Complex lists with inputs (like exercise sets) often lack context for screen readers. Associating inputs with their specific row (e.g., "Weight for set 1") is crucial.
-**Action:** Always verify nested inputs in map loops have unique, descriptive labels.
+## 2026-07-06 - Adding ARIA labels to shadcn/ui components\n**Learning:** When using shadcn/ui components like `Slider` or `Button` as icon-only interactive elements, they don't have built-in accessible names by default. It's crucial to manually attach `aria-label` attributes to them to ensure screen readers can announce their purpose.\n**Action:** Always check icon-only `Button` components and interactive primitives like `Slider` for missing `aria-label` attributes when enhancing accessibility in shadcn/ui-based applications.
