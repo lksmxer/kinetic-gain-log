@@ -43,6 +43,7 @@
     "@tanstack/react-query": "^5.56.2",
     "@types/gapi": "^0.0.47",
     "@types/google.accounts": "^0.0.17",
+    "@types/google.picker": "^0.0.52",
     "@types/uuid": "^9.0.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

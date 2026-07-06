@@ -10,6 +10,7 @@ import ExerciseItem from './ExerciseItem';
 import { downloadWorkout } from '@/utils/fileUtils';
 import { useToast } from '@/components/ui/use-toast';
 import { createFile, openFilePicker } from '@/lib/googleDrive';
+import sjson from 'secure-json-parse';
 
 interface WorkoutFormProps {
   workout: Workout;
@@ -52,10 +53,15 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
             let dataToParse;
             if (typeof res.body === 'string') {
               try {
-                dataToParse = JSON.parse(res.body);
+                dataToParse = sjson.parse(res.body, { protoAction: 'remove', constructorAction: 'remove' });
               } catch (e) {
                 console.error('Error parsing JSON from body', e);
-                dataToParse = null;
+                toast({
+                  title: 'Error loading from Google Drive',
+                  description: 'Failed to parse JSON data.',
+                  variant: 'destructive',
+                });
+                return;
               }
             } else {
               dataToParse = res.result;
