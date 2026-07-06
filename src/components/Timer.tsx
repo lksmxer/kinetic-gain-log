@@ -80,6 +80,7 @@ const Timer: React.FC<TimerProps> = ({ className }) => {
           variant="outline"
           size="icon"
           className="h-12 w-12 rounded-full bg-primary/10 border-primary/20 hover:bg-primary/20"
+          aria-label={isActive ? "Pause timer" : "Start timer"}
         >
           {isActive ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
         </Button>
@@ -89,6 +90,7 @@ const Timer: React.FC<TimerProps> = ({ className }) => {
           variant="outline"
           size="icon"
           className="h-12 w-12 rounded-full bg-secondary/20 border-secondary/20 hover:bg-secondary/30"
+          aria-label="Reset timer"
         >
           <RotateCcw className="h-5 w-5" />
         </Button>
@@ -102,6 +104,7 @@ const Timer: React.FC<TimerProps> = ({ className }) => {
           step={5}
           onValueChange={handleDurationChange}
           className="my-4"
+          aria-label="Timer duration"
         />
       </div>
       
