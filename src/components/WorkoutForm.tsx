@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Exercise, Workout, workoutSchema } from '@/models/workout';
+import { Exercise, Workout } from '@/models/workout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,10 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Save, Upload, Download } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
 import ExerciseItem from './ExerciseItem';
-import { downloadWorkout } from '@/utils/fileUtils';
+import { downloadWorkout, importWorkoutFromText } from '@/utils/fileUtils';
 import { useToast } from '@/components/ui/use-toast';
 import { createFile, openFilePicker } from '@/lib/googleDrive';
-import sjson from 'secure-json-parse';
 
 interface WorkoutFormProps {
   workout: Workout;
@@ -31,7 +30,7 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
         description: `${workout.name} has been saved to your Google Drive.`,
       });
     } catch (error) {
-      console.error('Failed to save to Google Drive', error);
+      console.error('Failed to save to Google Drive');
       toast({
         title: 'Error saving to Google Drive',
         description: 'An error occurred while saving the workout.',
@@ -50,32 +49,21 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
             alt: 'media',
           })
           .then((res) => {
-            let dataToParse;
+            let parsedWorkout: Workout | null = null;
             if (typeof res.body === 'string') {
-              try {
-                dataToParse = sjson.parse(res.body, { protoAction: 'remove', constructorAction: 'remove' });
-              } catch (e) {
-                console.error('Error parsing JSON from body', e);
-                toast({
-                  title: 'Error loading from Google Drive',
-                  description: 'Failed to parse JSON data.',
-                  variant: 'destructive',
-                });
-                return;
-              }
-            } else {
-              dataToParse = res.result;
+              parsedWorkout = importWorkoutFromText(res.body);
+            } else if (res.result) {
+              // Re-serialize and parse to ensure schema validation is run
+              parsedWorkout = importWorkoutFromText(JSON.stringify(res.result));
             }
 
-            const parsed = workoutSchema.safeParse(dataToParse);
-            if (parsed.success) {
-              onWorkoutChange(parsed.data);
+            if (parsedWorkout) {
+              onWorkoutChange(parsedWorkout);
               toast({
                 title: 'Workout loaded from Google Drive',
                 description: `Workout has been loaded from Google Drive.`,
               });
             } else {
-              console.error('Validation error', parsed.error);
               toast({
                 title: 'Error loading from Google Drive',
                 description: 'The workout data is invalid or corrupted.',
@@ -84,7 +72,7 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
             }
           })
           .catch((error) => {
-            console.error('Failed to load from Google Drive', error);
+            console.error('Failed to load from Google Drive');
             toast({
               title: 'Error loading from Google Drive',
               description: 'An error occurred while loading the workout.',
@@ -110,11 +98,16 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
   };
 
   const updateExercise = useCallback((updatedExercise: Exercise) => {
+    const index = workout.exercises.findIndex(e => e.id === updatedExercise.id);
+    if (index === -1) return;
+
     onWorkoutChange({
       ...workout,
-      exercises: workout.exercises.map(exercise =>
-        exercise.id === updatedExercise.id ? updatedExercise : exercise
-      )
+      exercises: [
+        ...workout.exercises.slice(0, index),
+        updatedExercise,
+        ...workout.exercises.slice(index + 1)
+      ]
     });
   }, [workout, onWorkoutChange]);
 

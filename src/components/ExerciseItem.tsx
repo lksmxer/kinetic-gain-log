@@ -62,9 +62,14 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
   const heaviestWeight = useMemo(() => {
     if (!exercise.sets || exercise.sets.length === 0) return 0;
     
-    return exercise.sets.reduce((max, set) => {
-      return (set.weight && set.weight > max) ? set.weight : max;
-    }, 0);
+    let max = 0;
+    for (let i = 0; i < exercise.sets.length; i++) {
+      const weight = exercise.sets[i].weight;
+      if (weight && weight > max) {
+        max = weight;
+      }
+    }
+    return max;
   }, [exercise.sets]);
 
   const warmupSets = useMemo(() => generateWarmupSets(heaviestWeight), [heaviestWeight]);
