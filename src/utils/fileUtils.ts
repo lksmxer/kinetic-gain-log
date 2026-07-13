@@ -31,11 +31,11 @@ export const importWorkoutFromText = (text: string): Workout | null => {
     if (result.success) {
       return result.data;
     } else {
-      console.error("Failed to validate workout data:", result.error);
+      console.error("Failed to validate workout data: Invalid schema");
       return null;
     }
   } catch (error) {
-    console.error("Failed to parse workout file:", error);
+    console.error("Failed to parse workout file: Invalid JSON format");
     return null;
   }
 };

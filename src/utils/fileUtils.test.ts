@@ -56,7 +56,7 @@ describe("fileUtils", () => {
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
       const lastCall = consoleSpy.mock.calls[0];
-      expect(lastCall[0]).toContain("Failed to parse workout file:");
+      expect(lastCall[0]).toContain("Failed to parse workout file: Invalid JSON format");
     });
 
     test("should return null and log error for JSON that fails schema validation", () => {
@@ -74,7 +74,7 @@ describe("fileUtils", () => {
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
       const lastCall = consoleSpy.mock.calls[0];
-      expect(lastCall[0]).toContain("Failed to validate workout data:");
+      expect(lastCall[0]).toContain("Failed to validate workout data: Invalid schema");
     });
   });
 });

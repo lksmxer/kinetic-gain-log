@@ -84,8 +84,14 @@ export const generateWarmupSets = (workingWeight: number): { weight: number, rep
   // - 90% × 3 reps
   // - 100% × working reps
   
-  return WARMUP_PROTOCOL.map(set => ({
-    weight: Math.round(workingWeight * set.percentage / 5) * 5, // Round to nearest 5
-    reps: set.reps
-  }));
+  const numSets = WARMUP_PROTOCOL.length;
+  const warmupSets = new Array(numSets);
+  for (let i = 0; i < numSets; i++) {
+    const set = WARMUP_PROTOCOL[i];
+    warmupSets[i] = {
+      weight: Math.round(workingWeight * set.percentage / 5) * 5, // Round to nearest 5
+      reps: set.reps
+    };
+  }
+  return warmupSets;
 };

@@ -204,4 +204,35 @@ describe("generateWarmupSets", () => {
     expect(warmupSets[2].weight).toBe(90);
     expect(warmupSets[3].weight).toBe(100);
   });
+
+  test("should handle 0 weight", () => {
+    const warmupSets = generateWarmupSets(0);
+    expect(warmupSets).toHaveLength(4);
+    expect(warmupSets[0].weight).toBe(0);
+    expect(warmupSets[1].weight).toBe(0);
+    expect(warmupSets[2].weight).toBe(0);
+    expect(warmupSets[3].weight).toBe(0);
+  });
+
+  test("should handle negative weights", () => {
+    const warmupSets = generateWarmupSets(-100);
+    // Should still calculate mathematically, but could be bounded if desired.
+    // Given the current implementation, it returns negative numbers.
+    expect(warmupSets[0].weight).toBe(-40);
+    expect(warmupSets[1].weight).toBe(-60);
+    expect(warmupSets[2].weight).toBe(-80);
+    expect(warmupSets[3].weight).toBe(-90);
+  });
+
+  test("should handle small weights that round down to 0", () => {
+    const warmupSets = generateWarmupSets(5);
+    // 5 * 0.4 = 2 -> 0
+    // 5 * 0.6 = 3 -> 5
+    // 5 * 0.8 = 4 -> 5
+    // 5 * 0.9 = 4.5 -> 5
+    expect(warmupSets[0].weight).toBe(0);
+    expect(warmupSets[1].weight).toBe(5);
+    expect(warmupSets[2].weight).toBe(5);
+    expect(warmupSets[3].weight).toBe(5);
+  });
 });
