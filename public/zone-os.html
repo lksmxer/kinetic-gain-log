@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZONE_OS // Flow State System & Zone Calculator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans, Inter, Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        mono: ['"Space Mono"', 'monospace'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        gemini: {
+                            bg: '#0e0f12',
+                            surface: '#181920',
+                            surfaceHover: '#21222c',
+                            card: '#1d1e26',
+                            border: 'rgba(255, 255, 255, 0.08)',
+                            borderHover: 'rgba(255, 255, 255, 0.16)',
+                            blue: '#4285f4',
+                            purple: '#9b51e0',
+                            pink: '#ec4899',
+                            amber: '#fbbc05',
+                            emerald: '#10b981',
+                            text: '#f3f4f6',
+                            muted: '#9ca3af'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #0e0f12;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(66, 133, 244, 0.07) 0%, transparent 40%),
+                radial-gradient(circle at 85% 20%, rgba(155, 81, 224, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 50% 85%, rgba(251, 188, 5, 0.04) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Spark Gradients inspired by Gemini UI */
+        .spark-gradient {
+            background: linear-gradient(135deg, #4285f4 0%, #9b51e0 50%, #ec4899 100%);
+        }
+
+        .spark-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #c084fc 50%, #fde047 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .spark-border {
+            position: relative;
+        }
+        .spark-border::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 1.5rem;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(66, 133, 244, 0.4), rgba(155, 81, 224, 0.4), rgba(251, 188, 5, 0.4));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* Gemini Style Fluid Cards */
+        .gemini-card {
+            background: rgba(24, 25, 32, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.5rem;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .gemini-card:hover {
+            border-color: rgba(255, 255, 255, 0.16);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Pill Buttons & Navigation */
+        .pill-btn {
+            border-radius: 9999px;
+            transition: all 0.2s ease;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0e0f12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2b36;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9b51e0;
+        }
+
+        /* Resonant Breathing Animations */
+        @keyframes breathScale {
+            0%, 100% { transform: scale(0.88); opacity: 0.5; }
+            50% { transform: scale(1.35); opacity: 1; }
+        }
+
+        .pulse-pacer {
+            animation: breathScale 11s infinite ease-in-out;
+        }
+
+        /* Modern Custom Range Sliders */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: #252632;
+            border-radius: 9999px;
+            height: 6px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #60a5fa;
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(96, 165, 250, 0.6);
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-purple-500 selection:text-white">
+
+    <!-- HEADER NAVBAR -->
+    <header class="w-full border-b border-gemini-border bg-gemini-bg/80 sticky top-0 z-50 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-4">
+            
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('protocol')">
+                <div class="w-8 h-8 rounded-full spark-gradient flex items-center justify-center p-0.5 shadow-lg shadow-purple-500/20">
+                    <div class="w-full h-full bg-gemini-bg rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-sparkles text-xs spark-text"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base tracking-tight text-white flex items-center gap-2">
+                        ZONE_OS <span class="text-[10px] font-mono spark-text font-bold px-2 py-0.5 rounded-full bg-white/5 border border-white/10">v3.5 FLOW INTELLIGENCE</span>
+                    </h1>
+                    <p class="text-[10px] text-gemini-muted font-medium">NEUROBIOLOGY & GALAXY WATCH 4 INTEGRATION</p>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <nav class="flex items-center space-x-1.5 overflow-x-auto py-1 max-w-full bg-gemini-surface p-1.5 rounded-full border border-gemini-border">
+                <button onclick="switchTab('protocol')" id="tab-btn-protocol" class="tab-btn pill-btn px-3.5 py-1.5 text-xs font-semibold text-white bg-white/10 border border-white/15 transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-list-check text-blue-400"></i> Protocol
+                </button>
+                <button onclick="switchTab('audio')" id="tab-btn-audio" class="tab-btn pill-btn px-3.5 py-1.5 text-xs font-medium text-gemini-muted hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-headphones text-purple-400"></i> Audio Synth
+                </button>
+                <button onclick="switchTab('calculator')" id="tab-btn-calculator" class="tab-btn pill-btn px-3.5 py-1.5 text-xs font-medium text-gemini-muted hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-calculator text-emerald-400"></i> GW4 Calculator
+                </button>
+                <button onclick="switchTab('guide')" id="tab-btn-guide" class="tab-btn pill-btn px-3.5 py-1.5 text-xs font-medium text-gemini-muted hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-brain text-amber-400"></i> Science & Aomine
+                </button>
+                <button onclick="switchTab('explainer')" id="tab-btn-explainer" class="tab-btn pill-btn px-3.5 py-1.5 text-xs font-medium text-gemini-muted hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-circle-question text-pink-400"></i> Plain Explainer
+                </button>
+                <button onclick="switchTab('history')" id="tab-btn-history" class="tab-btn pill-btn px-3.5 py-1.5 text-xs font-medium text-gemini-muted hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Logs
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-8 w-full flex-grow">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: PROTOCOL & REAL-TIME CHECKLIST      -->
+        <!-- ========================================== -->
+        <section id="tab-protocol" class="tab-content space-y-8">
+            
+            <!-- Hero Title -->
+            <div class="gemini-card p-6 md:p-8 relative overflow-hidden spark-border">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-wider spark-text mb-1">Priming Protocol Blueprint</div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                            Manual Flow State Entry Sequence
+                        </h2>
+                        <p class="text-xs md:text-sm text-gemini-muted mt-2 max-w-2xl leading-relaxed">
+                            A timed neurological countdown designed to optimize neurochemistry, calm autonomic anxiety, and silence prefrontal overthinking before competitive gaming or athletics.
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-3 bg-black/40 px-4 py-3 rounded-2xl border border-gemini-border">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span>
+                        <div class="text-xs">
+                            <div class="text-gemini-muted text-[10px] font-mono uppercase">System Status</div>
+                            <div class="text-white font-semibold">Ready for Priming</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Protocol Phase Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Phase 1: Metabolic Priming -->
+                <div class="gemini-card p-6 flex flex-col justify-between relative group">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-medium px-3 py-1 bg-white/5 border border-white/10 text-gemini-muted rounded-full">T-45 Minutes</span>
+                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Phase 01</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-pills text-blue-400"></i> Metabolic & Supplement Priming
+                        </h3>
+                        <p class="text-xs text-gemini-muted mb-4 leading-relaxed">
+                            Fuel dopamine and norepinephrine production for high alertness while preventing adrenaline-induced muscle tremors.
+                        </p>
+                        <div class="space-y-3 text-xs mb-6">
+                            <div class="p-3 bg-black/30 border border-gemini-border rounded-xl flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-blue-400 mt-0.5"></i>
+                                <div>
+                                    <strong class="text-white font-semibold">100–200mg Caffeine + 200–400mg L-Theanine:</strong>
+                                    <span class="text-gemini-muted block text-[11px] mt-0.5">1:2 ratio provides calm, sharp focus without jitters or cardiac anxiety.</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-black/30 border border-gemini-border rounded-xl flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-blue-400 mt-0.5"></i>
+                                <div>
+                                    <strong class="text-white font-semibold">1,500mg L-Tyrosine:</strong>
+                                    <span class="text-gemini-muted block text-[11px] mt-0.5">Direct dopamine precursor that prevents cognitive burnout during high stress.</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-black/30 border border-gemini-border rounded-xl flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-blue-400 mt-0.5"></i>
+                                <div>
+                                    <strong class="text-white font-semibold">500mL Water + 300mg Electrolytes:</strong>
+                                    <span class="text-gemini-muted block text-[11px] mt-0.5">Optimizes nerve signal conduction speed across muscle networks.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="triggerPhaseCheck(1)" id="phase-btn-1" class="w-full py-2.5 pill-btn bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-regular fa-circle-check"></i> Mark Phase 1 Complete
+                    </button>
+                </div>
+
+                <!-- Phase 2: Autonomic Tuning + Resonant Breathing -->
+                <div class="gemini-card p-6 flex flex-col justify-between relative group">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-medium px-3 py-1 bg-purple-500/10 text-purple-300 border border-purple-500/20 rounded-full">T-30 Minutes</span>
+                            <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Phase 02</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-lungs text-purple-400"></i> Autonomic Tuning & Resonant Pacer
+                        </h3>
+                        <p class="text-xs text-gemini-muted mb-4 leading-relaxed">
+                            Engage your vagal nerve to trigger "Autonomic Coactivation" (combining maximum physical energy with calm mental composure).
+                        </p>
+
+                        <!-- Interactive Resonant Breath Visualizer Widget -->
+                        <div class="bg-black/40 border border-gemini-border rounded-2xl p-4 mb-4 flex flex-col items-center justify-center relative overflow-hidden">
+                            <div class="text-[11px] font-bold spark-text tracking-wider uppercase mb-1">0.1 Hz Resonant Breathing Pacer</div>
+                            <p class="text-[10px] text-gemini-muted mb-3 text-center">Inhale 5.5s // Exhale 5.5s (6 Breaths / Minute)</p>
+                            
+                            <div class="w-24 h-24 flex items-center justify-center relative my-2">
+                                <div id="breath-circle" class="w-16 h-16 bg-purple-500/20 border-2 border-purple-400 rounded-full flex items-center justify-center transition-all duration-1000 shadow-xl shadow-purple-500/20">
+                                    <span id="breath-text" class="text-xs font-bold text-white">READY</span>
+                                </div>
+                            </div>
+
+                            <button onclick="toggleBreathingPacer()" id="pacer-toggle-btn" class="mt-3 px-5 py-2 pill-btn bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition shadow-lg shadow-purple-600/30">
+                                Start 5-Min Pacer
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="triggerPhaseCheck(2)" id="phase-btn-2" class="w-full py-2.5 pill-btn bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-regular fa-circle-check"></i> Mark Phase 2 Complete
+                    </button>
+                </div>
+
+                <!-- Phase 3: Prefrontal Deactivation -->
+                <div class="gemini-card p-6 flex flex-col justify-between relative group">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-medium px-3 py-1 bg-white/5 border border-white/10 text-gemini-muted rounded-full">T-10 Minutes</span>
+                            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Phase 03</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-brain text-amber-400"></i> Prefrontal Cortex Silencing
+                        </h3>
+                        <p class="text-xs text-gemini-muted mb-4 leading-relaxed">
+                            Temporarily shut off overthinking (Transient Hypofrontality) and hand control to instinct and muscle memory.
+                        </p>
+                        <ul class="text-xs space-y-3 text-neutral-300">
+                            <li class="flex items-start gap-3 bg-black/30 p-3 rounded-xl border border-gemini-border">
+                                <i class="fa-solid fa-person-running text-amber-400 mt-0.5"></i>
+                                <span><strong class="text-white">Dynamic Warm-Up:</strong> 5 mins of explosive movement (60–75% Max HR) shifts cerebral blood flow to motor cortices.</span>
+                            </li>
+                            <li class="flex items-start gap-3 bg-black/30 p-3 rounded-xl border border-gemini-border">
+                                <i class="fa-solid fa-wind text-amber-400 mt-0.5"></i>
+                                <span><strong class="text-white">3x Physiological Sighs:</strong> Double quick inhale through nose, long slow mouth exhale to clear $CO_2$.</span>
+                            </li>
+                            <li class="flex items-start gap-3 bg-black/30 p-3 rounded-xl border border-gemini-border">
+                                <i class="fa-solid fa-bullseye text-amber-400 mt-0.5"></i>
+                                <span><strong class="text-white">Visual Anchor Routine:</strong> Fixate eyes on a tiny static point (e.g., crosshair or ball seam) for 30s.</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <button onclick="triggerPhaseCheck(3)" id="phase-btn-3" class="w-full py-2.5 pill-btn bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-xs transition flex items-center justify-center gap-2 mt-4">
+                        <i class="fa-regular fa-circle-check"></i> Mark Phase 3 Complete
+                    </button>
+                </div>
+
+                <!-- Phase 4: In-Game Maintenance -->
+                <div class="gemini-card p-6 flex flex-col justify-between relative group">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-medium px-3 py-1 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-full">Live Match / Game</span>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Phase 04</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-emerald-400"></i> In-Game Zone Maintenance
+                        </h3>
+                        <p class="text-xs text-gemini-muted mb-4 leading-relaxed">
+                            Maintain peak composure under intense competitive stress using real-time micro-resets.
+                        </p>
+                        <div class="space-y-3 text-xs">
+                            <div class="p-3 bg-black/30 border border-gemini-border rounded-xl">
+                                <div class="text-emerald-400 font-semibold mb-1 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-rotate-left"></i> Panic Emergency Reset (3 Seconds):
+                                </div>
+                                <p class="text-gemini-muted text-[11px] leading-relaxed">
+                                    If heart rate spikes or overthinking starts during a mistake, perform 1 Physiological Sigh during any break or pause. Drops HR by 5-8 BPM instantly.
+                                </p>
+                            </div>
+                            <div class="p-3 bg-black/30 border border-gemini-border rounded-xl">
+                                <div class="text-white font-semibold mb-1 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-crosshair text-amber-400"></i> Micro-Task Focus:
+                                </div>
+                                <p class="text-gemini-muted text-[11px] leading-relaxed">
+                                    Ignore overall match scores, stats, or win/loss outcomes. Focus 100% on the single immediate next micro-action.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="triggerPhaseCheck(4)" id="phase-btn-4" class="w-full py-2.5 pill-btn bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 font-semibold text-xs transition flex items-center justify-center gap-2 mt-4">
+                        <i class="fa-solid fa-fire text-emerald-400"></i> Enter the Zone
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: SPOTIFY-STYLE AUDIO ENGINE (OFFLINE)-->
+        <!-- ========================================== -->
+        <section id="tab-audio" class="tab-content space-y-8 hidden">
+            
+            <div class="gemini-card p-6 md:p-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-wider spark-text mb-1">Web Audio Binaural Engine</div>
+                        <h2 class="text-2xl font-bold text-white">
+                            Offline Binaural Beat & Sound Synthesizer
+                        </h2>
+                        <p class="text-xs text-gemini-muted mt-1 max-w-xl">
+                            100% offline browser synthesizer. Wear stereo headphones. Generates live target brainwave frequencies for deep focus and reaction speed.
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-black/40 px-3.5 py-2 rounded-full border border-gemini-border">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-md shadow-emerald-500/50"></span>
+                        <span class="text-xs font-medium text-white">Synth Engine: Online</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modern Audio Player Card -->
+            <div class="gemini-card p-6 md:p-8 relative">
+                
+                <!-- Track Info & Visualizer Canvas -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    
+                    <div class="md:col-span-5 flex items-center space-x-4">
+                        <div class="w-20 h-20 bg-gradient-to-tr from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden group">
+                            <i class="fa-solid fa-compact-disc text-3xl text-purple-400 group-hover:rotate-180 transition-transform duration-1000"></i>
+                        </div>
+                        <div>
+                            <span id="player-preset-tag" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase">10 Hz Alpha Focus</span>
+                            <h3 id="player-track-title" class="text-lg font-bold text-white mt-1">Alpha Waves (Flow State)</h3>
+                            <p id="player-track-sub" class="text-xs text-gemini-muted font-mono mt-0.5">100Hz Left / 110Hz Right Stereo Delta</p>
+                        </div>
+                    </div>
+
+                    <!-- Audio Visualizer Canvas -->
+                    <div class="md:col-span-7 bg-black/50 border border-gemini-border rounded-2xl p-3 h-24 flex items-center justify-center relative overflow-hidden">
+                        <canvas id="audio-canvas" class="w-full h-full"></canvas>
+                    </div>
+                </div>
+
+                <!-- Track Selection Buttons -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-6">
+                    <button onclick="selectAudioPreset('alpha')" id="audio-preset-alpha" class="audio-preset-btn p-4 bg-white/10 border border-blue-400/50 rounded-2xl text-left transition hover:bg-white/15">
+                        <div class="text-xs font-bold text-blue-400">01. ALPHA FOCUS (10 Hz)</div>
+                        <div class="text-[11px] text-gemini-muted mt-1">Calm alertness & smooth visual composure</div>
+                    </button>
+                    <button onclick="selectAudioPreset('gamma')" id="audio-preset-gamma" class="audio-preset-btn p-4 bg-black/30 border border-gemini-border rounded-2xl text-left transition hover:bg-white/10">
+                        <div class="text-xs font-bold text-purple-400">02. GAMMA PEAK (40 Hz)</div>
+                        <div class="text-[11px] text-gemini-muted mt-1">Hyper-reaction speed & explosive execution</div>
+                    </button>
+                    <button onclick="selectAudioPreset('ambient')" id="audio-preset-ambient" class="audio-preset-btn p-4 bg-black/30 border border-gemini-border rounded-2xl text-left transition hover:bg-white/10">
+                        <div class="text-xs font-bold text-pink-400">03. AMBIENT PINK NOISE</div>
+                        <div class="text-[11px] text-gemini-muted mt-1">Filtered neural mask for total immersion</div>
+                    </button>
+                </div>
+
+                <!-- Controls & Volume -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gemini-border">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="toggleAudioSynth()" id="master-play-btn" class="w-12 h-12 rounded-full spark-gradient hover:opacity-90 text-white flex items-center justify-center text-lg transition shadow-lg shadow-purple-500/25">
+                            <i class="fa-solid fa-play ml-0.5"></i>
+                        </button>
+                        <span id="audio-status-text" class="text-xs text-gemini-muted font-medium">Status: Stopped</span>
+                    </div>
+
+                    <!-- Volume Control Slider -->
+                    <div class="flex items-center space-x-3 w-full sm:w-64">
+                        <i class="fa-solid fa-volume-high text-xs text-gemini-muted"></i>
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.3" oninput="updateAudioVolume()" class="w-full">
+                        <span id="volume-label" class="text-xs text-gemini-muted font-mono">30%</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: GALAXY WATCH 4 CALCULATOR           -->
+        <!-- ========================================== -->
+        <section id="tab-calculator" class="tab-content space-y-8 hidden">
+            
+            <!-- Banner -->
+            <div class="gemini-card p-6 md:p-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-wider spark-text mb-1">Biometric & Psychometric Diagnostics</div>
+                        <h2 class="text-2xl font-bold text-white">
+                            Galaxy Watch 4 Zone % Calculator
+                        </h2>
+                        <p class="text-xs text-gemini-muted mt-1 max-w-xl">
+                            Calculates your exact Zone Percentage by cross-referencing your Galaxy Watch 4 PPG Heart Rate Variability (RMSSD) with Flow-Short-Scale post-session metrics.
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="loadPreset('deep')" class="px-3.5 py-1.5 pill-btn bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition">
+                            Preset: Deep Flow
+                        </button>
+                        <button onclick="loadPreset('panic')" class="px-3.5 py-1.5 pill-btn bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition">
+                            Preset: Panic Over-Arousal
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculator Form Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Inputs (7 Cols) -->
+                <div class="lg:col-span-7 space-y-6">
+                    
+                    <!-- 1. Galaxy Watch Biometrics -->
+                    <div class="gemini-card p-6 space-y-4">
+                        <div class="flex items-center justify-between border-b border-gemini-border pb-3">
+                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-stopwatch text-blue-400"></i> 1. Galaxy Watch 4 Biometrics
+                            </h3>
+                            <span class="text-[10px] text-gemini-muted uppercase font-mono">PPG & HR Data</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs text-gemini-muted mb-1 font-medium">Resting Baseline RMSSD (ms)</label>
+                                <input type="number" id="input-rest-rmssd" value="58" class="w-full bg-black/40 border border-gemini-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-400">
+                                <span class="text-[10px] text-gemini-muted">Waking resting HRV</span>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gemini-muted mb-1 font-medium">Active Match RMSSD (ms)</label>
+                                <input type="number" id="input-active-rmssd" value="39" class="w-full bg-black/40 border border-gemini-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-400">
+                                <span class="text-[10px] text-gemini-muted">Session average HRV</span>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gemini-muted mb-1 font-medium">Resting Heart Rate (BPM)</label>
+                                <input type="number" id="input-rest-hr" value="62" class="w-full bg-black/40 border border-gemini-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-400">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gemini-muted mb-1 font-medium">Peak Session HR (BPM)</label>
+                                <input type="number" id="input-active-hr" value="138" class="w-full bg-black/40 border border-gemini-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-400">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Psychometric Flow Scale -->
+                    <div class="gemini-card p-6 space-y-4">
+                        <div class="flex items-center justify-between border-b border-gemini-border pb-3">
+                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-purple-400"></i> 2. Psychometric Flow Evaluation
+                            </h3>
+                            <span class="text-[10px] text-gemini-muted font-mono">1 to 7 Likert Scale</span>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- Fluency -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-neutral-300 font-medium">Fluency of Execution (Smoothness/No lag)</span>
+                                    <span id="val-fluency" class="text-blue-400 font-bold">6 / 7</span>
+                                </div>
+                                <input type="range" id="input-fluency" min="1" max="7" value="6" oninput="updateSliderLabels()" class="w-full">
+                            </div>
+
+                            <!-- Absorption -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-neutral-300 font-medium">Total Absorption (Time distortion / Immersion)</span>
+                                    <span id="val-absorption" class="text-blue-400 font-bold">6 / 7</span>
+                                </div>
+                                <input type="range" id="input-absorption" min="1" max="7" value="6" oninput="updateSliderLabels()" class="w-full">
+                            </div>
+
+                            <!-- Worry -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-neutral-300 font-medium">Cognitive Worry / Anxiety (Overthinking)</span>
+                                    <span id="val-worry" class="text-blue-400 font-bold">2 / 7</span>
+                                </div>
+                                <input type="range" id="input-worry" min="1" max="7" value="2" oninput="updateSliderLabels()" class="w-full">
+                            </div>
+
+                            <!-- Challenge Balance -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-neutral-300 font-medium">Challenge-Skill Match (Optimal difficulty)</span>
+                                    <span id="val-challenge" class="text-blue-400 font-bold">6 / 7</span>
+                                </div>
+                                <input type="range" id="input-challenge" min="1" max="7" value="6" oninput="updateSliderLabels()" class="w-full">
+                            </div>
+                        </div>
+
+                        <button onclick="calculateZoneScore()" class="w-full py-3 pill-btn spark-gradient text-white font-bold text-xs tracking-wider transition uppercase shadow-lg shadow-purple-500/20">
+                            Compute Zone Percentage
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Outputs (5 Cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="gemini-card p-6 sticky top-20">
+                        <div class="text-xs font-semibold uppercase tracking-wider spark-text mb-1">Diagnostic Output</div>
+                        <h3 class="text-sm font-bold text-white uppercase mb-4">Zone Mastery Score</h3>
+
+                        <!-- Gauge Display -->
+                        <div class="flex flex-col items-center justify-center my-6">
+                            <div class="relative w-44 h-44 flex items-center justify-center border-4 border-white/5 rounded-full bg-black/60">
+                                <div id="score-gauge-border" class="absolute inset-0 border-4 border-emerald-500 rounded-full transition-all duration-700 shadow-lg shadow-emerald-500/20"></div>
+                                <div class="text-center z-10">
+                                    <span id="output-zone-score" class="text-4xl font-extrabold text-white tracking-tight">88%</span>
+                                    <div id="output-badge" class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mt-1">Deep Zone State</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sub Breakdown -->
+                        <div class="space-y-3 text-xs border-t border-b border-gemini-border py-4 my-4 font-mono">
+                            <div class="flex justify-between">
+                                <span class="text-gemini-muted">RMSSD Vagal Drop:</span>
+                                <span id="output-rmssd-drop" class="text-white font-bold">32.8% (Optimal)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gemini-muted">Autonomic Profile:</span>
+                                <span id="output-autonomic" class="text-emerald-400 font-bold">Coactivated</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gemini-muted">Prefrontal Critic:</span>
+                                <span id="output-hypo" class="text-emerald-400 font-bold">Silenced (Hypo)</span>
+                            </div>
+                        </div>
+
+                        <!-- Gemini AI Style Recommendation Box -->
+                        <div id="output-recommendation" class="p-3.5 bg-black/40 border border-gemini-border rounded-xl text-xs text-gemini-muted leading-relaxed">
+                            <strong>Status: Optimal Flow.</strong> Your vagal brake remains engaged (32% RMSSD drop) alongside high physical output. Prefrontal interference is silenced.
+                        </div>
+
+                        <button onclick="saveCurrentSession()" class="w-full mt-4 py-2.5 pill-btn bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-white font-semibold transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bookmark text-purple-400"></i> Save Session to Logs
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: SCIENCE & AOMINE DAIKI GUIDE        -->
+        <!-- ========================================== -->
+        <section id="tab-guide" class="tab-content space-y-8 hidden">
+            
+            <!-- Science Overview -->
+            <div class="gemini-card p-6 md:p-8">
+                <div class="text-xs font-semibold uppercase tracking-wider spark-text mb-1">Neuroscience & Anime Comparison</div>
+                <h2 class="text-2xl font-bold text-white mb-3">
+                    Demystifying Daiki Aomine's "Zone Brute Force"
+                </h2>
+                <p class="text-sm text-gemini-muted leading-relaxed mb-6">
+                    In <em>Kuroko No Basket</em>, Daiki Aomine forces his way into the Zone by shutting out all thoughts, ignoring fatigue, and operating entirely on instinct. While anime dramatizes this with lightning effects, <strong>neurobiology proves the exact same mechanism exists in real life</strong>.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                    <div class="p-5 bg-black/30 border border-gemini-border rounded-2xl">
+                        <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">// The Brain Brake (Prefrontal Cortex)</div>
+                        <p class="text-xs text-gemini-muted leading-relaxed">
+                            Overthinking creates reaction lag: <em>"What if I miss? What is the defender doing?"</em> Entering the Zone requires silencing the prefrontal cortex—a state neuroscientists call <strong>Transient Hypofrontality</strong>.
+                        </p>
+                    </div>
+                    <div class="p-5 bg-black/30 border border-gemini-border rounded-2xl">
+                        <div class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-1">// The Engine (Implicit Motor System)</div>
+                        <p class="text-xs text-gemini-muted leading-relaxed">
+                            Once overthinking stops, control transfers to basal ganglia and motor cortices. You stop "trying" and start executing instantly from muscle memory. Aomine's "Formless Shot" is pure implicit memory running free.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Table -->
+            <div class="gemini-card p-6 md:p-8 overflow-x-auto">
+                <div class="text-xs font-semibold uppercase tracking-wider spark-text mb-2">Cross Reference Matrix</div>
+                <h3 class="text-lg font-bold text-white mb-4">Aomine Daiki vs. Real-World Elite Athletes</h3>
+                
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-gemini-border text-gemini-muted">
+                            <th class="py-3 px-4 font-bold">Parameter</th>
+                            <th class="py-3 px-4 font-bold text-purple-400">Aomine's Zone (Anime)</th>
+                            <th class="py-3 px-4 font-bold text-emerald-400">Top Athletes (Kobe, Jordan, Pro Gamers)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5 text-neutral-300">
+                        <tr>
+                            <td class="py-3.5 px-4 font-semibold text-white">Trigger</td>
+                            <td class="py-3.5 px-4">Sheer anger/willpower against Kagami.</td>
+                            <td class="py-3.5 px-4">Nootropics + 0.1Hz breathing + dynamic motor warm-up.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3.5 px-4 font-semibold text-white">Brain Mechanism</td>
+                            <td class="py-3.5 px-4">Unlocks 100% muscle potential.</td>
+                            <td class="py-3.5 px-4"><strong>Transient Hypofrontality</strong> (Silences explicit inner critic).</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3.5 px-4 font-semibold text-white">Autonomic State</td>
+                            <td class="py-3.5 px-4">Pure adrenaline rage.</td>
+                            <td class="py-3.5 px-4"><strong>Autonomic Coactivation</strong> (High adrenaline + calm vagal brake).</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3.5 px-4 font-semibold text-white">Fatigue / Limit</td>
+                            <td class="py-3.5 px-4">Instant physical crash at 100% tank empty.</td>
+                            <td class="py-3.5 px-4">Dopamine depletion; sustained via physiological sighs during breaks.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- The 4 Science Levers -->
+            <div class="gemini-card p-6 md:p-8">
+                <div class="text-xs font-semibold uppercase tracking-wider spark-text mb-1">The 4 Physiological Levers</div>
+                <h3 class="text-lg font-bold text-white mb-4">What Actually Works & Why</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="p-4 bg-black/30 border border-gemini-border rounded-2xl">
+                        <div class="text-sm font-bold text-blue-400 mb-1">01. Nootropic Ratio</div>
+                        <p class="text-xs text-gemini-muted">Caffeine + L-Theanine (1:2 ratio) spikes focus without tremors or panic response.</p>
+                    </div>
+                    <div class="p-4 bg-black/30 border border-gemini-border rounded-2xl">
+                        <div class="text-sm font-bold text-purple-400 mb-1">02. 0.1Hz Breathing</div>
+                        <p class="text-xs text-gemini-muted">5.5s In / 5.5s Out syncs heart rate with respiration, maintaining HRV under stress.</p>
+                    </div>
+                    <div class="p-4 bg-black/30 border border-gemini-border rounded-2xl">
+                        <div class="text-sm font-bold text-pink-400 mb-1">03. Physiological Sigh</div>
+                        <p class="text-xs text-gemini-muted">Double inhale + long exhale offloads $CO_2$ and activates vagal nerve in 3s.</p>
+                    </div>
+                    <div class="p-4 bg-black/30 border border-gemini-border rounded-2xl">
+                        <div class="text-sm font-bold text-amber-400 mb-1">04. Catecholamines</div>
+                        <p class="text-xs text-gemini-muted">L-Tyrosine restores dopamine & norepinephrine during prolonged competition.</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: PLAIN EXPLAINER & GW4 DATA GUIDE    -->
+        <!-- ========================================== -->
+        <section id="tab-explainer" class="tab-content space-y-8 hidden">
+            
+            <div class="gemini-card p-6 md:p-8">
+                <div class="text-xs font-semibold uppercase tracking-wider spark-text mb-1">Plain-English Neuroscience Breakdown</div>
+                <h2 class="text-2xl font-bold text-white mb-2">
+                    What Does Any of This Actually Mean?
+                </h2>
+                <p class="text-xs text-gemini-muted max-w-2xl leading-relaxed">
+                    No medical jargon or confusing textbook talk. Here is the simple, real-world translation of all the biological metrics, chemical ratios, and Galaxy Watch 4 data used in this system.
+                </p>
+            </div>
+
+            <!-- Plain Explainer Accordion Cards -->
+            <div class="space-y-4">
+                
+                <!-- Item 1: RMSSD & HRV -->
+                <div class="gemini-card p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="fa-solid fa-heart-pulse text-blue-400 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-1">1. What is RMSSD / HRV? (The Heart Engine Metric)</h3>
+                            <div class="text-xs text-gemini-muted space-y-2 leading-relaxed">
+                                <p><strong class="text-white">Analogy:</strong> Think of your heart like a car motor. If your heart ticks at exactly 60 BPM (1 beat per second with 0 variance), your motor is rigid and stressed. High-performing motors have micro-variations between beats (e.g. 1.05s, 0.95s, 1.02s). That variation is measured in milliseconds as <strong class="text-blue-300">RMSSD</strong>.</p>
+                                <p><strong class="text-white">Why it matters for Flow:</strong> When you start playing, your RMSSD naturally drops as adrenaline kicks in. A drop of 18% to 40% is the "sweet spot" where you are pumped up but still calm enough to aim or execute smoothly. A drop bigger than 50% means you are panicking or over-aroused.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 2: Transient Hypofrontality -->
+                <div class="gemini-card p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="fa-solid fa-brain text-purple-400 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-1">2. Transient Hypofrontality (Silencing Overthinking)</h3>
+                            <div class="text-xs text-gemini-muted space-y-2 leading-relaxed">
+                                <p><strong class="text-white">Analogy:</strong> Imagine driving a race car while an annoying backseat driver constantly shouts instructions: <em>"Turn left now! Don't mess up! Watch out!"</em> You will react slowly and crash. The backseat driver is your Prefrontal Cortex (your conscious, overthinking brain).</p>
+                                <p><strong class="text-white">Why it matters for Flow:</strong> "Transient Hypofrontality" literally means temporarily ("transient") dialing down ("hypo") your front brain ("frontality"). This shuts up the backseat driver so your muscle memory can drive automatically.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 3: Vagal Brake & Autonomic Coactivation -->
+                <div class="gemini-card p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="fa-solid fa-gauge-high text-emerald-400 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-1">3. Parasympathetic Vagal Brake & Autonomic Coactivation</h3>
+                            <div class="text-xs text-gemini-muted space-y-2 leading-relaxed">
+                                <p><strong class="text-white">Analogy:</strong> Holding the brake pedal lightly in a sports car while stepping on the gas. The gas gives you explosive power (Adrenaline / Sympathetic system), while the brake keeps you steering smoothly without flying off the cliff (Vagus Nerve / Parasympathetic system).</p>
+                                <p><strong class="text-white">Why it matters for Flow:</strong> This dual state is called <strong class="text-emerald-300">Autonomic Coactivation</strong>. It is how top athletes stay relaxed while moving at lightning speed.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 4: Caffeine + L-Theanine 1:2 Ratio -->
+                <div class="gemini-card p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="fa-solid fa-capsules text-amber-400 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-1">4. Caffeine + L-Theanine (The 1:2 Golden Ratio)</h3>
+                            <div class="text-xs text-gemini-muted space-y-2 leading-relaxed">
+                                <p><strong class="text-white">Why Caffeine alone fails:</strong> 200mg of Caffeine alone triggers muscle jitters, rapid heart rate spikes, and aiming tremors.</p>
+                                <p><strong class="text-white">The fix:</strong> Pairing 100mg Caffeine with 200mg L-Theanine (an amino acid found in green tea) smooths out the caffeine spike. You get razor-sharp visual alertness without the physical shakes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Galaxy Watch 4 Guide Section -->
+                <div class="gemini-card p-6 spark-border">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fa-solid fa-watch-fitness text-xl spark-text"></i>
+                        <h3 class="text-base font-bold text-white">How to Get Your RMSSD Data from Galaxy Watch 4 (Step-by-Step)</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+                        <div class="p-4 bg-black/40 border border-gemini-border rounded-2xl">
+                            <div class="text-blue-400 font-bold mb-1">Method 1: Welltory App (Easiest)</div>
+                            <p class="text-gemini-muted text-[11px] leading-relaxed">
+                                Install Welltory on phone + Galaxy Watch 4. Open Welltory and run a 2-minute HRV measurement. Look at the <strong class="text-white">"RMSSD"</strong> value displayed in milliseconds.
+                            </p>
+                        </div>
+                        <div class="p-4 bg-black/40 border border-gemini-border rounded-2xl">
+                            <div class="text-purple-400 font-bold mb-1">Method 2: Elite HRV App</div>
+                            <p class="text-gemini-muted text-[11px] leading-relaxed">
+                                Sync Galaxy Watch 4 PPG sensor via Health Connect or Elite HRV app. Run a 1-minute morning rest test for baseline RMSSD, then run a post-game test.
+                            </p>
+                        </div>
+                        <div class="p-4 bg-black/40 border border-gemini-border rounded-2xl">
+                            <div class="text-emerald-400 font-bold mb-1">Method 3: Samsung Health</div>
+                            <p class="text-gemini-muted text-[11px] leading-relaxed">
+                                Check Samsung Health detailed logs for resting heart rate and session peak BPM. Convert stress score trends directly into the GW4 Zone Calculator tab.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 6: SESSION HISTORY LOGS                -->
+        <!-- ========================================== -->
+        <section id="tab-history" class="tab-content space-y-8 hidden">
+            <div class="gemini-card p-6 md:p-8">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-wider spark-text mb-1">Archive & Diagnostics</div>
+                        <h2 class="text-2xl font-bold text-white">Zone Session Logs</h2>
+                    </div>
+                    <button onclick="clearHistory()" class="px-3.5 py-1.5 pill-btn bg-white/5 hover:bg-red-500/20 text-gemini-muted hover:text-red-400 border border-white/10 text-xs font-semibold transition">
+                        Clear Logs
+                    </button>
+                </div>
+                <p class="text-xs text-gemini-muted mb-6">
+                    Review your past athletic or gaming sessions to identify biometric trends in your flow entry success rate.
+                </p>
+
+                <!-- History Container -->
+                <div id="history-container" class="space-y-3 text-xs font-mono">
+                    <div class="text-center py-8 text-gemini-muted">
+                        No sessions saved yet. Run the Zone Calculator and click "Save Session to Logs".
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="max-w-7xl mx-auto px-4 py-6 w-full border-t border-gemini-border text-center text-xs text-gemini-muted flex flex-col sm:flex-row justify-between items-center gap-2">
+        <div>ZONE_OS // APPLIED NEUROBIOLOGY & FLOW INTELLIGENCE</div>
+        <div>OPTIMIZED FOR GALAXY WATCH 4 PPG DATA</div>
+    </footer>
+
+    <script>
+        // Global State Keys & Variable Initializations
+        const STORAGE_KEY = 'ZONE_OS_SESSIONS_LOG_V3_5';
+        let pacerInterval = null;
+        let isBreathingRunning = false;
+        
+        // Web Audio Synthesizer State
+        let audioCtx = null;
+        let oscLeft = null;
+        let oscRight = null;
+        let noiseNode = null;
+        let masterGain = null;
+        let isAudioPlaying = false;
+        let currentPreset = 'alpha'; // alpha, gamma, ambient
+        let animFrameId = null;
+
+        // Window Load Execution
+        window.onload = function() {
+            updateSliderLabels();
+            calculateZoneScore();
+            renderHistory();
+            initAudioCanvas();
+        };
+
+        // Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-white', 'bg-white/10', 'border-white/15', 'font-semibold');
+                btn.classList.add('text-gemini-muted', 'font-medium');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            activeBtn.classList.add('text-white', 'bg-white/10', 'border-white/15', 'font-semibold');
+            activeBtn.classList.remove('text-gemini-muted', 'font-medium');
+        }
+
+        // Protocol Checklist Handler
+        function triggerPhaseCheck(phaseNum) {
+            const btn = document.getElementById(`phase-btn-${phaseNum}`);
+            if (btn.classList.contains('completed')) {
+                btn.classList.remove('completed');
+                btn.innerHTML = `<i class="fa-regular fa-circle-check"></i> Mark Phase ${phaseNum} Complete`;
+                btn.className = "w-full py-2.5 pill-btn bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-xs transition flex items-center justify-center gap-2";
+            } else {
+                btn.classList.add('completed');
+                btn.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Phase ${phaseNum} Primed`;
+                btn.className = "w-full py-2.5 pill-btn bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-semibold text-xs transition flex items-center justify-center gap-2";
+            }
+        }
+
+        // 0.1 Hz Resonant Breathing Pacer
+        function toggleBreathingPacer() {
+            const circle = document.getElementById('breath-circle');
+            const text = document.getElementById('breath-text');
+            const toggleBtn = document.getElementById('pacer-toggle-btn');
+
+            if (isBreathingRunning) {
+                clearInterval(pacerInterval);
+                isBreathingRunning = false;
+                circle.style.transform = 'scale(1)';
+                text.innerText = 'READY';
+                toggleBtn.innerText = 'Start 5-Min Pacer';
+                toggleBtn.className = "mt-3 px-5 py-2 pill-btn bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition shadow-lg shadow-purple-600/30";
+            } else {
+                isBreathingRunning = true;
+                toggleBtn.innerText = 'Stop Pacer';
+                toggleBtn.className = "mt-3 px-5 py-2 pill-btn bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold transition shadow-lg shadow-pink-600/30";
+                
+                let isInhale = true;
+                const runCycle = () => {
+                    if (isInhale) {
+                        circle.style.transform = 'scale(1.35)';
+                        text.innerText = 'INHALE';
+                    } else {
+                        circle.style.transform = 'scale(0.85)';
+                        text.innerText = 'EXHALE';
+                    }
+                    isInhale = !isInhale;
+                };
+
+                runCycle();
+                pacerInterval = setInterval(runCycle, 5500); // 5.5s cycle
+            }
+        }
+
+        // Slider Labels Update
+        function updateSliderLabels() {
+            document.getElementById('val-fluency').innerText = `${document.getElementById('input-fluency').value} / 7`;
+            document.getElementById('val-absorption').innerText = `${document.getElementById('input-absorption').value} / 7`;
+            document.getElementById('val-worry').innerText = `${document.getElementById('input-worry').value} / 7`;
+            document.getElementById('val-challenge').innerText = `${document.getElementById('input-challenge').value} / 7`;
+        }
+
+        // Preset Loader for Calculator
+        function loadPreset(type) {
+            if (type === 'deep') {
+                document.getElementById('input-rest-rmssd').value = 58;
+                document.getElementById('input-active-rmssd').value = 39;
+                document.getElementById('input-rest-hr').value = 62;
+                document.getElementById('input-active-hr').value = 138;
+                document.getElementById('input-fluency').value = 6;
+                document.getElementById('input-absorption').value = 7;
+                document.getElementById('input-worry').value = 1;
+                document.getElementById('input-challenge').value = 6;
+            } else if (type === 'panic') {
+                document.getElementById('input-rest-rmssd').value = 60;
+                document.getElementById('input-active-rmssd').value = 19;
+                document.getElementById('input-rest-hr').value = 65;
+                document.getElementById('input-active-hr').value = 172;
+                document.getElementById('input-fluency').value = 3;
+                document.getElementById('input-absorption').value = 3;
+                document.getElementById('input-worry').value = 6;
+                document.getElementById('input-challenge').value = 3;
+            }
+            updateSliderLabels();
+            calculateZoneScore();
+        }
+
+        // Zone Algorithm Calculation
+        function calculateZoneScore() {
+            const restRMSSD = parseFloat(document.getElementById('input-rest-rmssd').value) || 50;
+            const activeRMSSD = parseFloat(document.getElementById('input-active-rmssd').value) || 35;
+            
+            const fluency = parseFloat(document.getElementById('input-fluency').value);
+            const absorption = parseFloat(document.getElementById('input-absorption').value);
+            const worry = parseFloat(document.getElementById('input-worry').value);
+            const challenge = parseFloat(document.getElementById('input-challenge').value);
+
+            // 1. Biometric Score: RMSSD % Drop
+            const rmssdDrop = ((restRMSSD - activeRMSSD) / restRMSSD) * 100;
+
+            let bioScore = 0;
+            let autonomicState = "Coactivated";
+
+            if (rmssdDrop >= 18 && rmssdDrop <= 42) {
+                bioScore = 95;
+                autonomicState = "Optimal Coactivation";
+            } else if (rmssdDrop > 42 && rmssdDrop <= 58) {
+                bioScore = 68;
+                autonomicState = "High Sympathetic";
+            } else if (rmssdDrop > 58) {
+                bioScore = 30;
+                autonomicState = "Sympathetic Overdrive";
+            } else {
+                bioScore = 50;
+                autonomicState = "Under-Aroused";
+            }
+
+            // 2. Psychometric Score
+            const psychRaw = fluency + absorption + (8 - worry) + challenge;
+            const psychScore = (psychRaw / 28) * 100;
+
+            // 3. Final Score
+            const finalScore = Math.round((bioScore * 0.45) + (psychScore * 0.55));
+
+            // Render Output
+            document.getElementById('output-zone-score').innerText = `${finalScore}%`;
+            document.getElementById('output-rmssd-drop').innerText = `${rmssdDrop.toFixed(1)}% (${autonomicState})`;
+
+            const badge = document.getElementById('output-badge');
+            const gaugeBorder = document.getElementById('score-gauge-border');
+            const hypoBadge = document.getElementById('output-hypo');
+            const autonomicBadge = document.getElementById('output-autonomic');
+            const recBox = document.getElementById('output-recommendation');
+
+            autonomicBadge.innerText = autonomicState;
+
+            if (finalScore >= 80) {
+                badge.innerText = "Deep Zone State";
+                badge.className = "text-[10px] font-bold text-emerald-400 uppercase tracking-wider mt-1";
+                gaugeBorder.style.borderColor = "#10b981";
+                hypoBadge.innerText = "Silenced (Hypo)";
+                hypoBadge.className = "text-emerald-400 font-bold";
+                recBox.innerHTML = `<strong>Status: Perfect Flow.</strong> Prefrontal overthinking is silenced. Vagal brake preserved motor control under high physical stress.`;
+            } else if (finalScore >= 65) {
+                badge.innerText = "Moderate Flow";
+                badge.className = "text-[10px] font-bold text-amber-400 uppercase tracking-wider mt-1";
+                gaugeBorder.style.borderColor = "#fbbc05";
+                hypoBadge.innerText = "Partial Silence";
+                hypoBadge.className = "text-amber-400 font-bold";
+                recBox.innerHTML = `<strong>Status: Solid Focus.</strong> Good flow with mild overthinking. Execute 2 minutes of Phase 2 Resonant Breathing to deepen state.`;
+            } else if (rmssdDrop > 50 || worry >= 5) {
+                badge.innerText = "Sympathetic Panic";
+                badge.className = "text-[10px] font-bold text-pink-500 uppercase tracking-wider mt-1";
+                gaugeBorder.style.borderColor = "#ec4899";
+                hypoBadge.innerText = "Overactive (Thinking)";
+                hypoBadge.className = "text-pink-400 font-bold";
+                recBox.innerHTML = `<strong>Status: Anxiety / Overthinking.</strong> RMSSD dropped drastically (${rmssdDrop.toFixed(1)}%). Perform physiological sighs during timeouts to lower heart rate.`;
+            } else {
+                badge.innerText = "Under-Aroused";
+                badge.className = "text-[10px] font-bold text-gemini-muted uppercase tracking-wider mt-1";
+                gaugeBorder.style.borderColor = "#4b5563";
+                hypoBadge.innerText = "Inactive";
+                hypoBadge.className = "text-gemini-muted font-bold";
+                recBox.innerHTML = `<strong>Status: Low Engagement.</strong> Insufficient nervous system drive. Increase explosive warm-up movement to boost adrenaline.`;
+            }
+
+            return { finalScore, rmssdDrop, autonomicState };
+        }
+
+        // Local Storage Session Saver
+        function saveCurrentSession() {
+            const { finalScore, rmssdDrop, autonomicState } = calculateZoneScore();
+            const session = {
+                id: Date.now(),
+                date: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                score: finalScore,
+                rmssdDrop: rmssdDrop.toFixed(1),
+                state: autonomicState
+            };
+
+            let logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            logs.unshift(session);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+
+            renderHistory();
+            switchTab('history');
+        }
+
+        // Render History Logs
+        function renderHistory() {
+            const container = document.getElementById('history-container');
+            let logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+            if (logs.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-gemini-muted">No sessions saved yet. Run the Zone Calculator and click "Save Session to Logs".</div>`;
+                return;
+            }
+
+            container.innerHTML = logs.map(log => `
+                <div class="p-4 bg-black/40 border border-gemini-border rounded-2xl flex items-center justify-between hover:border-white/20 transition">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-xl font-bold ${log.score >= 80 ? 'text-emerald-400' : log.score >= 65 ? 'text-amber-400' : 'text-pink-500'}">
+                            ${log.score}%
+                        </div>
+                        <div>
+                            <div class="text-white font-bold">${log.state}</div>
+                            <div class="text-[10px] text-gemini-muted">${log.date} // RMSSD Drop: ${log.rmssdDrop}%</div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] px-3 py-1 rounded-full bg-white/5 border border-white/10 text-neutral-300">
+                        ${log.score >= 80 ? 'Deep Zone' : 'Calibrated'}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        // Clear History
+        function clearHistory() {
+            localStorage.removeItem(STORAGE_KEY);
+            renderHistory();
+        }
+
+        // Web Audio Synthesizer Engine
+        function initAudioSynth() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function selectAudioPreset(preset) {
+            currentPreset = preset;
+            document.querySelectorAll('.audio-preset-btn').forEach(btn => {
+                btn.classList.remove('bg-white/10', 'border-blue-400/50');
+                btn.classList.add('bg-black/30', 'border-gemini-border');
+            });
+
+            const tag = document.getElementById('player-preset-tag');
+            const title = document.getElementById('player-track-title');
+            const sub = document.getElementById('player-track-sub');
+
+            if (preset === 'alpha') {
+                document.getElementById('audio-preset-alpha').classList.add('bg-white/10', 'border-blue-400/50');
+                tag.innerText = "10 Hz Alpha Focus";
+                tag.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase";
+                title.innerText = "Alpha Waves (Flow State)";
+                sub.innerText = "100Hz Left / 110Hz Right Stereo Binaural Beat";
+            } else if (preset === 'gamma') {
+                document.getElementById('audio-preset-gamma').classList.add('bg-white/10', 'border-blue-400/50');
+                tag.innerText = "40 Hz Gamma Peak";
+                tag.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase";
+                title.innerText = "Gamma Peak (Reaction Speed)";
+                sub.innerText = "200Hz Left / 240Hz Right Stereo Binaural Beat";
+            } else if (preset === 'ambient') {
+                document.getElementById('audio-preset-ambient').classList.add('bg-white/10', 'border-blue-400/50');
+                tag.innerText = "Ambient Pink Noise";
+                tag.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30 uppercase";
+                title.innerText = "Pink Noise Soundscape";
+                sub.innerText = "Filtered neural mask for complete sensory isolation";
+            }
+
+            if (isAudioPlaying) {
+                stopAudioSynth();
+                startAudioSynth();
+            }
+        }
+
+        function toggleAudioSynth() {
+            initAudioSynth();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            if (isAudioPlaying) {
+                stopAudioSynth();
+            } else {
+                startAudioSynth();
+            }
+        }
+
+        function startAudioSynth() {
+            initAudioSynth();
+            const vol = parseFloat(document.getElementById('volume-slider').value);
+
+            masterGain = audioCtx.createGain();
+            masterGain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            masterGain.connect(audioCtx.destination);
+
+            if (currentPreset === 'alpha' || currentPreset === 'gamma') {
+                const baseFreq = currentPreset === 'alpha' ? 100 : 200;
+                const beatFreq = currentPreset === 'alpha' ? 10 : 40;
+
+                oscLeft = audioCtx.createOscillator();
+                oscLeft.type = 'sine';
+                oscLeft.frequency.value = baseFreq;
+
+                oscRight = audioCtx.createOscillator();
+                oscRight.type = 'sine';
+                oscRight.frequency.value = baseFreq + beatFreq;
+
+                oscLeft.connect(masterGain);
+                oscRight.connect(masterGain);
+
+                oscLeft.start();
+                oscRight.start();
+            } else if (currentPreset === 'ambient') {
+                const bufferSize = audioCtx.sampleRate * 2;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                    data[i] *= 0.11;
+                    b6 = white * 0.115926;
+                }
+
+                noiseNode = audioCtx.createBufferSource();
+                noiseNode.buffer = buffer;
+                noiseNode.loop = true;
+                noiseNode.connect(masterGain);
+                noiseNode.start();
+            }
+
+            isAudioPlaying = true;
+            document.getElementById('master-play-btn').innerHTML = `<i class="fa-solid fa-pause"></i>`;
+            document.getElementById('audio-status-text').innerText = `Status: Playing (${currentPreset.toUpperCase()})`;
+            document.getElementById('audio-status-text').className = "text-xs text-emerald-400 font-bold";
+        }
+
+        function stopAudioSynth() {
+            if (oscLeft) { oscLeft.stop(); oscLeft.disconnect(); oscLeft = null; }
+            if (oscRight) { oscRight.stop(); oscRight.disconnect(); oscRight = null; }
+            if (noiseNode) { noiseNode.stop(); noiseNode.disconnect(); noiseNode = null; }
+            if (masterGain) { masterGain.disconnect(); masterGain = null; }
+
+            isAudioPlaying = false;
+            document.getElementById('master-play-btn').innerHTML = `<i class="fa-solid fa-play ml-0.5"></i>`;
+            document.getElementById('audio-status-text').innerText = `Status: Stopped`;
+            document.getElementById('audio-status-text').className = "text-xs text-gemini-muted font-medium";
+        }
+
+        function updateAudioVolume() {
+            const vol = parseFloat(document.getElementById('volume-slider').value);
+            document.getElementById('volume-label').innerText = `${Math.round(vol * 100)}%`;
+            if (masterGain && audioCtx) {
+                masterGain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            }
+        }
+
+        // Canvas Visualizer
+        function initAudioCanvas() {
+            const canvas = document.getElementById('audio-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            function draw() {
+                animFrameId = requestAnimationFrame(draw);
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (!isAudioPlaying) {
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, canvas.height / 2);
+                    ctx.lineTo(canvas.width, canvas.height / 2);
+                    ctx.stroke();
+                    return;
+                }
+
+                ctx.strokeStyle = currentPreset === 'gamma' ? '#c084fc' : currentPreset === 'ambient' ? '#ec4899' : '#60a5fa';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+
+                const sliceWidth = canvas.width / 100;
+                let x = 0;
+                const time = Date.now() * 0.005;
+
+                for (let i = 0; i < 100; i++) {
+                    const freq = currentPreset === 'gamma' ? 0.2 : 0.08;
+                    const y = (canvas.height / 2) + Math.sin(i * freq + time) * (canvas.height / 3.5);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                    x += sliceWidth;
+                }
+                ctx.stroke();
+            }
+            draw();
+        }
+    </script>
+</body>
+</html>
