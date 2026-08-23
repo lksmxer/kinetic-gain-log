@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import Layout from '@/components/Layout';
 import WorkoutForm from '@/components/WorkoutForm';
@@ -8,10 +7,9 @@ import { Workout } from '@/models/workout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { v4 as uuidv4 } from 'uuid';
 import ProgressTracker from '@/components/ProgressTracker';
-import { MoonIcon, SunIcon } from 'lucide-react';
+import { MoonIcon, SunIcon, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
-import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -38,24 +36,37 @@ const Index = () => {
 
   return (
     <Layout>
-      {(user) => (a
+      {(user) => (
         <>
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <a href="/zone-os.html" target="_blank" rel="noopener noreferrer">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 bg-secondary/20 border-secondary/30 hover:bg-secondary/40 font-semibold text-xs"
+              >
+                <Zap className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
+                ZONE_OS Calculator
+              </Button>
+            </a>
+
             <Button
               variant="outline"
               size="icon"
               onClick={toggleTheme}
               className="bg-secondary/20 border-secondary/30"
+              aria-label="Toggle theme"
             >
               {theme === 'dark' ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
             </Button>
           </div>
 
           <Tabs defaultValue="workout" className="mb-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="workout">Workout</TabsTrigger>
               <TabsTrigger value="timer">Timer</TabsTrigger>
               <TabsTrigger value="progress">Progress</TabsTrigger>
+              <TabsTrigger value="zone">ZONE_OS</TabsTrigger>
             </TabsList>
 
             <TabsContent value="workout" className="mt-4">
@@ -76,12 +87,16 @@ const Index = () => {
             </TabsContent>
 
             <TabsContent value="zone" className="mt-4">
-            <div className="w-full h-[85vh] rounded-xl overflow-hidden border border-border">
-              <iframe src="/zone-os.html" className="w-full h-full border-0" title="ZONE_OS" />
-            </div>
-          </TabsContent>
+              <div className="w-full h-[85vh] rounded-xl overflow-hidden border border-border">
+                <iframe
+                  src="/zone-os.html"
+                  className="w-full h-full border-0"
+                  title="ZONE_OS Flow State System"
+                />
+              </div>
+            </TabsContent>
           </Tabs>
-    
+
           <ImportDialog
             open={importDialogOpen}
             onOpenChange={setImportDialogOpen}
