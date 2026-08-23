@@ -1,6 +1,6 @@
 
 import { expect, test, describe, spyOn, afterEach } from "bun:test";
-import { exportWorkoutToText, importWorkoutFromText } from "./fileUtils";
+import { exportWorkoutToText, importWorkoutFromText, importWorkoutFromObject } from "./fileUtils";
 import { Workout } from "@/models/workout";
 
 const mockWorkout: Workout = {
@@ -37,6 +37,23 @@ describe("fileUtils", () => {
       const parsed = JSON.parse(result);
       expect(parsed).toEqual(mockWorkout);
       expect(result).toContain('"name": "Morning Push"');
+    });
+  });
+
+  describe("importWorkoutFromObject", () => {
+    test("should return the validated workout for a valid object", () => {
+      const result = importWorkoutFromObject(mockWorkout);
+      expect(result).toEqual(mockWorkout);
+    });
+
+    test("should return null and log error for an object that fails schema validation", () => {
+      const consoleSpy = spyOn(console, "error").mockImplementation(() => {});
+      const invalidObj = { id: "w1", date: "2023-10-27" }; // Missing required fields
+
+      const result = importWorkoutFromObject(invalidObj);
+
+      expect(result).toBeNull();
+      expect(consoleSpy).toHaveBeenCalledWith("Failed to validate workout data: Invalid schema");
     });
   });
 
