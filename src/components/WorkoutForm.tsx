@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Save, Upload, Download } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
 import ExerciseItem from './ExerciseItem';
-import { downloadWorkout, importWorkoutFromText } from '@/utils/fileUtils';
+import { downloadWorkout, importWorkoutFromText, importWorkoutFromObject } from '@/utils/fileUtils';
 import { useToast } from '@/components/ui/use-toast';
 import { createFile, openFilePicker } from '@/lib/googleDrive';
 
@@ -53,8 +53,8 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
             if (typeof res.body === 'string') {
               parsedWorkout = importWorkoutFromText(res.body);
             } else if (res.result) {
-              // Re-serialize and parse to ensure schema validation is run
-              parsedWorkout = importWorkoutFromText(JSON.stringify(res.result));
+              // Validate directly against the object
+              parsedWorkout = importWorkoutFromObject(res.result);
             }
 
             if (parsedWorkout) {

@@ -54,7 +54,7 @@ const Layout: React.FC<LayoutProps> = ({ children, className }) => {
       if (typeof gapi !== 'undefined' && gapi.client) {
         const currentToken = gapi.client.getToken();
         setUser((prev) => {
-          if (JSON.stringify(prev) === JSON.stringify(currentToken)) return prev;
+          if (prev?.access_token === currentToken?.access_token) return prev;
           return currentToken ? { ...currentToken } : null;
         });
       }

@@ -23,17 +23,20 @@ export const downloadWorkout = (workout: Workout) => {
   document.body.removeChild(element);
 };
 
+export const importWorkoutFromObject = (obj: unknown): Workout | null => {
+  const result = workoutSchema.safeParse(obj);
+  if (result.success) {
+    return result.data;
+  } else {
+    console.error("Failed to validate workout data: Invalid schema");
+    return null;
+  }
+};
+
 export const importWorkoutFromText = (text: string): Workout | null => {
   try {
     const parsed = sjson.parse(text, { protoAction: 'remove', constructorAction: 'remove' });
-    const result = workoutSchema.safeParse(parsed);
-
-    if (result.success) {
-      return result.data;
-    } else {
-      console.error("Failed to validate workout data: Invalid schema");
-      return null;
-    }
+    return importWorkoutFromObject(parsed);
   } catch (error) {
     console.error("Failed to parse workout file: Invalid JSON format");
     return null;
