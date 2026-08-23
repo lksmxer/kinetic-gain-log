@@ -22,6 +22,9 @@ const Index = () => {
   });
   const { theme, setTheme } = useTheme();
 
+  // Dynamic base URL for GitHub Pages compatibility
+  const zoneUrl = `${import.meta.env.BASE_URL}zone-os.html`;
+
   const handleImportWorkout = useCallback((importedWorkout: Workout) => {
     setWorkout(importedWorkout);
   }, []);
@@ -39,7 +42,7 @@ const Index = () => {
       {(user) => (
         <>
           <div className="flex justify-between items-center mb-4">
-            <a href="/zone-os.html" target="_blank" rel="noopener noreferrer">
+            <a href={zoneUrl} target="_blank" rel="noopener noreferrer">
               <Button
                 variant="outline"
                 size="sm"
@@ -89,7 +92,7 @@ const Index = () => {
             <TabsContent value="zone" className="mt-4">
               <div className="w-full h-[85vh] rounded-xl overflow-hidden border border-border">
                 <iframe
-                  src="/zone-os.html"
+                  src={zoneUrl}
                   className="w-full h-full border-0"
                   title="ZONE_OS Flow State System"
                 />
