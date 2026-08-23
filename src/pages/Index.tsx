@@ -11,6 +11,7 @@ import ProgressTracker from '@/components/ProgressTracker';
 import { MoonIcon, SunIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -37,7 +38,7 @@ const Index = () => {
 
   return (
     <Layout>
-      {(user) => (
+      {(user) => (a
         <>
           <div className="flex justify-end mb-4">
             <Button
@@ -73,8 +74,14 @@ const Index = () => {
             <TabsContent value="progress" className="mt-4">
               <ProgressTracker workout={workout} />
             </TabsContent>
-          </Tabs>
 
+            <TabsContent value="zone" className="mt-4">
+            <div className="w-full h-[85vh] rounded-xl overflow-hidden border border-border">
+              <iframe src="/zone-os.html" className="w-full h-full border-0" title="ZONE_OS" />
+            </div>
+          </TabsContent>
+          </Tabs>
+    
           <ImportDialog
             open={importDialogOpen}
             onOpenChange={setImportDialogOpen}
