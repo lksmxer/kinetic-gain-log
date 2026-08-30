@@ -13,7 +13,7 @@ import { createFile, openFilePicker } from '@/lib/googleDrive';
 
 interface WorkoutFormProps {
   workout: Workout;
-  onWorkoutChange: (workout: Workout) => void;
+  onWorkoutChange: React.Dispatch<React.SetStateAction<Workout>>;
   onImport: () => void;
   user: unknown;
 }
@@ -91,43 +91,45 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
       notes: ''
     };
     
-    onWorkoutChange({
-      ...workout,
-      exercises: [...workout.exercises, newExercise]
-    });
+    onWorkoutChange(prev => ({
+      ...prev,
+      exercises: [...prev.exercises, newExercise]
+    }));
   };
 
   const updateExercise = useCallback((updatedExercise: Exercise) => {
-    const index = workout.exercises.findIndex(e => e.id === updatedExercise.id);
-    if (index === -1) return;
+    onWorkoutChange(prev => {
+      const index = prev.exercises.findIndex(e => e.id === updatedExercise.id);
+      if (index === -1) return prev;
 
-    onWorkoutChange({
-      ...workout,
-      exercises: [
-        ...workout.exercises.slice(0, index),
-        updatedExercise,
-        ...workout.exercises.slice(index + 1)
-      ]
+      return {
+        ...prev,
+        exercises: [
+          ...prev.exercises.slice(0, index),
+          updatedExercise,
+          ...prev.exercises.slice(index + 1)
+        ]
+      };
     });
-  }, [workout, onWorkoutChange]);
+  }, [onWorkoutChange]);
 
   const deleteExercise = useCallback((exerciseId: string) => {
-    onWorkoutChange({
-      ...workout,
-      exercises: workout.exercises.filter(exercise => exercise.id !== exerciseId)
-    });
-  }, [workout, onWorkoutChange]);
+    onWorkoutChange(prev => ({
+      ...prev,
+      exercises: prev.exercises.filter(exercise => exercise.id !== exerciseId)
+    }));
+  }, [onWorkoutChange]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onWorkoutChange({ ...workout, name: e.target.value });
+    onWorkoutChange(prev => ({ ...prev, name: e.target.value }));
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onWorkoutChange({ ...workout, date: e.target.value });
+    onWorkoutChange(prev => ({ ...prev, date: e.target.value }));
   };
 
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onWorkoutChange({ ...workout, notes: e.target.value });
+    onWorkoutChange(prev => ({ ...prev, notes: e.target.value }));
   };
 
   const handleSave = () => {
