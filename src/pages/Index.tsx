@@ -69,7 +69,6 @@ const Index = () => {
               <TabsTrigger value="workout" className="flex-1 min-w-fit">Workout</TabsTrigger>
               <TabsTrigger value="timer" className="flex-1 min-w-fit">Timer</TabsTrigger>
               <TabsTrigger value="progress" className="flex-1 min-w-fit">Progress</TabsTrigger>
-              <TabsTrigger value="zone" className="flex-1 min-w-fit">ZONE_OS</TabsTrigger>
             </TabsList>
 
             <TabsContent value="workout" className="mt-4">
@@ -87,16 +86,6 @@ const Index = () => {
 
             <TabsContent value="progress" className="mt-4">
               <ProgressTracker workout={workout} />
-            </TabsContent>
-
-            <TabsContent value="zone" className="mt-4">
-              <div className="w-full h-[85vh] rounded-xl overflow-hidden border border-border">
-                <iframe
-                  src={zoneUrl}
-                  className="w-full h-full border-0"
-                  title="ZONE_OS Flow State System"
-                />
-              </div>
             </TabsContent>
           </Tabs>
 

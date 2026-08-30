@@ -149,8 +149,8 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <div className="space-y-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div className="space-y-2 w-full sm:w-auto">
           <Input
             value={workout.name}
             onChange={handleNameChange}
@@ -165,7 +165,7 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
           />
         </div>
         
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={onImport} className="bg-secondary/20 border-secondary/30">
             <Upload className="h-4 w-4 mr-2" />
             Import
