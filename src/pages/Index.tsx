@@ -65,11 +65,11 @@ const Index = () => {
           </div>
 
           <Tabs defaultValue="workout" className="mb-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="workout">Workout</TabsTrigger>
-              <TabsTrigger value="timer">Timer</TabsTrigger>
-              <TabsTrigger value="progress">Progress</TabsTrigger>
-              <TabsTrigger value="zone">ZONE_OS</TabsTrigger>
+            <TabsList className="flex w-full overflow-x-auto">
+              <TabsTrigger value="workout" className="flex-1 min-w-fit">Workout</TabsTrigger>
+              <TabsTrigger value="timer" className="flex-1 min-w-fit">Timer</TabsTrigger>
+              <TabsTrigger value="progress" className="flex-1 min-w-fit">Progress</TabsTrigger>
+              <TabsTrigger value="zone" className="flex-1 min-w-fit">ZONE_OS</TabsTrigger>
             </TabsList>
 
             <TabsContent value="workout" className="mt-4">
