@@ -67,36 +67,36 @@ const Timer: React.FC<TimerProps> = ({ className }) => {
   const presetTimes = [30, 60, 90, 120, 180, 300];
 
   return (
-    <div className={`bg-secondary/30 backdrop-blur-sm border border-white/5 rounded-xl p-4 ${className}`}>
-      <h3 className="text-lg font-medium mb-2">Rest Timer</h3>
+    <div className={`font-mono p-4 ${className}`}>
+      <h3 className="text-lg font-medium mb-2 uppercase tracking-widest text-muted-foreground">Rest Timer</h3>
       
-      <div className="text-4xl font-bold text-center my-4 text-primary">
+      <div className="text-6xl md:text-8xl font-bold text-center my-8 text-foreground tracking-widest">
         {formatTime(seconds)}
       </div>
       
-      <div className="flex justify-center space-x-2 mb-6">
+      <div className="flex justify-center space-x-4 mb-10">
         <Button
           onClick={toggleTimer}
           variant="outline"
           size="icon"
-          className="h-12 w-12 rounded-full bg-primary/10 border-primary/20 hover:bg-primary/20"
+          className="h-16 w-16 rounded-full border-2 border-foreground hover:bg-foreground hover:text-background transition-colors"
           aria-label={isActive ? "Pause timer" : "Start timer"}
         >
-          {isActive ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+          {isActive ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
         </Button>
         
         <Button
           onClick={resetTimer}
           variant="outline"
           size="icon"
-          className="h-12 w-12 rounded-full bg-secondary/20 border-secondary/20 hover:bg-secondary/30"
+          className="h-16 w-16 rounded-full border-2 border-muted-foreground text-muted-foreground hover:border-foreground hover:text-foreground transition-colors"
           aria-label="Reset timer"
         >
-          <RotateCcw className="h-5 w-5" />
+          <RotateCcw className="h-7 w-7" />
         </Button>
       </div>
       
-      <div className="mb-6">
+      <div className="mb-8 px-4 max-w-md mx-auto">
         <Slider
           value={[duration]}
           min={5}
@@ -108,13 +108,13 @@ const Timer: React.FC<TimerProps> = ({ className }) => {
         />
       </div>
       
-      <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex flex-wrap gap-3 justify-center max-w-lg mx-auto">
         {presetTimes.map((time) => (
           <Button
             key={time}
             variant="outline"
             size="sm"
-            className="bg-secondary/20 border-secondary/20 hover:bg-secondary/30"
+            className="border-foreground/30 hover:border-foreground rounded-full px-6 transition-colors"
             onClick={() => {
               setDuration(time);
               if (!isActive) setSeconds(time);

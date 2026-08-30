@@ -43,66 +43,56 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ workout }) => {
         </TabsList>
         
         <TabsContent value="strength">
-          <Card className="bg-secondary/30 backdrop-blur-sm border border-white/5 rounded-xl mb-4">
-            <CardHeader>
-              <CardTitle className="text-base">Strength Progress Over Time</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80 w-full flex items-center justify-center text-muted-foreground">
-                <p>Not enough data to display progress chart.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="mb-8 mt-6">
+            <h3 className="text-lg font-medium mb-6 text-foreground">Strength Progress Over Time</h3>
+            <div className="h-80 w-full flex items-center justify-center text-muted-foreground bg-secondary/10 rounded-3xl">
+              <p>Not enough data to display progress chart.</p>
+            </div>
+          </div>
         </TabsContent>
         
         <TabsContent value="volume">
-          <Card className="bg-secondary/30 backdrop-blur-sm border border-white/5 rounded-xl mb-4">
-            <CardHeader>
-              <CardTitle className="text-base">Workout Volume Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {volumeData.length > 0 ? (
-                  volumeData.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center">
-                      <span className="font-medium">{item.exerciseName}</span>
-                      <div className="flex flex-col items-end">
-                        <span className="text-lg font-bold">{item.totalVolume} kg</span>
-                        <span className="text-xs text-muted-foreground">
-                          {item.setCount} sets × {item.totalReps} reps
-                        </span>
-                      </div>
+          <div className="mb-8 mt-6">
+            <h3 className="text-lg font-medium mb-6 text-foreground">Workout Volume Analysis</h3>
+            <div className="space-y-4 bg-secondary/5 rounded-3xl p-6">
+              {volumeData.length > 0 ? (
+                volumeData.map((item, index) => (
+                  <div key={index} className="flex justify-between items-center pb-4 border-b border-border/40 last:border-0 last:pb-0">
+                    <span className="font-medium">{item.exerciseName}</span>
+                    <div className="flex flex-col items-end">
+                      <span className="text-lg font-bold">{item.totalVolume} kg</span>
+                      <span className="text-xs text-muted-foreground">
+                        {item.setCount} sets × {item.totalReps} reps
+                      </span>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground">
-                    Add exercises to your workout to see volume analysis.
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-8">
+                  Add exercises to your workout to see volume analysis.
+                </p>
+              )}
+            </div>
+          </div>
         </TabsContent>
         
         <TabsContent value="1rm">
-          <Card className="bg-secondary/30 backdrop-blur-sm border border-white/5 rounded-xl mb-4">
-            <CardHeader>
-              <CardTitle className="text-base">Estimated One-Rep Max</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {workout.exercises.length > 0 ? (
-                  workout.exercises.map((exercise) => (
-                    <OneRMItem key={exercise.id} exercise={exercise} />
-                  ))
-                ) : (
-                  <p className="text-muted-foreground">
-                    Add exercises with weight and reps to calculate your estimated 1RM.
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="mb-8 mt-6">
+            <h3 className="text-lg font-medium mb-6 text-foreground">Estimated One-Rep Max</h3>
+            <div className="space-y-4 bg-secondary/5 rounded-3xl p-6">
+              {workout.exercises.length > 0 ? (
+                workout.exercises.map((exercise) => (
+                  <div key={exercise.id} className="pb-4 border-b border-border/40 last:border-0 last:pb-0">
+                    <OneRMItem exercise={exercise} />
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-8">
+                  Add exercises with weight and reps to calculate your estimated 1RM.
+                </p>
+              )}
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
