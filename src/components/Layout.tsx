@@ -77,16 +77,16 @@ const Layout: React.FC<LayoutProps> = ({ children, className }) => {
       "min-h-[100dvh] bg-background text-foreground flex flex-col",
       className
     )}>
-      <header className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold gemini-gradient bg-clip-text text-transparent">
             KineticLog
           </h1>
           <div>
             {user ? (
-              <Button onClick={handleSignOut}>Sign Out</Button>
+              <Button onClick={handleSignOut} variant="ghost" className="rounded-full">Sign Out</Button>
             ) : (
-              <Button onClick={handleSignIn} disabled={!scriptsLoaded}>Sign in with Google</Button>
+              <Button onClick={handleSignIn} disabled={!scriptsLoaded} variant="ghost" className="rounded-full">Sign in with Google</Button>
             )}
           </div>
         </div>

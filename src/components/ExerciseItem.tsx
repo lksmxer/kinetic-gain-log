@@ -75,22 +75,22 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
   const warmupSets = useMemo(() => generateWarmupSets(heaviestWeight), [heaviestWeight]);
 
   return (
-    <Card className="bg-secondary/30 backdrop-blur-sm border border-white/5 rounded-xl mb-4">
-      <CardHeader className="pb-2">
+    <div className="mb-6 p-4 rounded-3xl bg-secondary/5 border-none">
+      <div className="pb-4">
         <div className="flex items-center justify-between">
           <Input
             value={exercise.name}
             onChange={handleNameChange}
             placeholder="Exercise name"
             aria-label="Exercise name"
-            className="font-medium text-lg bg-background/50 border-none"
+            className="font-medium text-lg bg-background/50 border-none rounded-2xl"
           />
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 ml-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleExpanded}
-              className="hover:bg-secondary/50"
+              className="hover:bg-secondary/20 rounded-full"
               aria-label={expanded ? "Collapse exercise" : "Expand exercise"}
               aria-expanded={expanded}
             >
@@ -104,17 +104,17 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
               variant="ghost"
               size="icon"
               onClick={() => onDelete(exercise.id)}
-              className="text-destructive hover:bg-destructive/20"
+              className="text-destructive hover:bg-destructive/20 rounded-full"
               aria-label="Delete exercise"
             >
               <Trash2 className="h-5 w-5" />
             </Button>
           </div>
         </div>
-      </CardHeader>
+      </div>
       
       {expanded && (
-        <CardContent>
+        <div className="pt-2">
           {heaviestWeight > 0 && (
             <Collapsible className="mb-4">
               <div className="flex items-center justify-between mb-2">
@@ -123,7 +123,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
                     variant="outline" 
                     size="sm" 
                     onClick={() => setShowWarmupSets(!showWarmupSets)}
-                    className="bg-secondary/20 border-secondary/30 w-full"
+                    className="bg-secondary/20 border-secondary/30 w-full rounded-full"
                   >
                     <Thermometer className="h-4 w-4 mr-2" />
                     {showWarmupSets ? "Hide Warm-up Sets" : "Show Warm-up Sets"}
@@ -132,7 +132,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
               </div>
               
               <CollapsibleContent>
-                <div className="space-y-3 my-3 p-3 bg-secondary/10 rounded-lg">
+                <div className="space-y-3 my-3 p-4 bg-secondary/10 rounded-2xl">
                   <div className="grid grid-cols-12 gap-2 text-xs text-muted-foreground px-1">
                     <div className="col-span-2">Warm-up</div>
                     <div className="col-span-5">Weight</div>
@@ -187,14 +187,14 @@ const ExerciseItem: React.FC<ExerciseItemProps> = memo(({ exercise, onUpdate, on
             variant="outline"
             size="sm"
             onClick={addSet}
-            className="w-full mt-4 border-dashed border-border/50 bg-secondary/20 hover:bg-secondary/40"
+            className="w-full mt-4 border-dashed border-border/50 bg-secondary/20 hover:bg-secondary/40 rounded-full"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Set
           </Button>
-        </CardContent>
+        </div>
       )}
-    </Card>
+    </div>
   );
 });
 

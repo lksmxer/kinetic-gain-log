@@ -202,41 +202,35 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onWorkoutChange, onI
             ))}
           </div>
         ) : (
-          <Card className="bg-secondary/30 backdrop-blur-sm border border-white/5 rounded-xl">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <p className="text-muted-foreground mb-4">No exercises added yet</p>
-              <Button onClick={addExercise} variant="outline" className="border-dashed border-border/50">
-                <Plus className="h-4 w-4 mr-2" />
-                Add your first exercise
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-12 rounded-3xl bg-secondary/10">
+            <p className="text-muted-foreground mb-4">No exercises added yet</p>
+            <Button onClick={addExercise} variant="outline" className="border-dashed border-border/50 rounded-full">
+              <Plus className="h-4 w-4 mr-2" />
+              Add your first exercise
+            </Button>
+          </div>
         )}
         
         {workout.exercises.length > 0 && (
           <Button
             onClick={addExercise}
             variant="outline"
-            className="w-full border-dashed border-border/50"
+            className="w-full border-dashed border-border/50 rounded-full"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Exercise
           </Button>
         )}
         
-        <Card className="bg-secondary/30 backdrop-blur-sm border border-white/5 rounded-xl">
-          <CardHeader>
-            <CardTitle className="text-base">Workout Notes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              value={workout.notes || ''}
-              onChange={handleNotesChange}
-              placeholder="Add notes about this workout..."
-              className="min-h-[100px] bg-background/50 border-none"
-            />
-          </CardContent>
-        </Card>
+        <div className="pt-4">
+          <h3 className="text-lg font-medium mb-4 text-foreground">Workout Notes</h3>
+          <Textarea
+            value={workout.notes || ''}
+            onChange={handleNotesChange}
+            placeholder="Add notes about this workout..."
+            className="min-h-[100px] bg-secondary/10 border-none rounded-3xl p-6"
+          />
+        </div>
       </div>
     </div>
   );
